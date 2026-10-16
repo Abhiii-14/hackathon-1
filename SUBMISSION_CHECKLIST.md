@@ -20,14 +20,14 @@ FirmGen — Done
 - [x] Firmware generated and built
 - [x] FirmGen traceability report exported
 
-Physical ESP32 — Pending
+Physical ESP32 — Done
 
-- [ ] ESP32 board and components received
-- [ ] Circuit wired and checked
-- [ ] Firmware flashed to physical ESP32
-- [ ] Emergency and reset buttons tested
-- [ ] UART monitor output captured
-- [ ] Photos/video of hardware demonstration captured
+- [x] ESP32 board and components received
+- [x] Circuit wired and checked
+- [x] Firmware flashed to physical ESP32
+- [x] Emergency and reset buttons tested
+- [x] UART monitor output captured
+- [x] Photos/video of hardware demonstration captured
 
 GitHub and Submission — Pending
 

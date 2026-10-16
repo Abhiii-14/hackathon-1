@@ -16,20 +16,20 @@ Test Cases
 
 Test ID| Requirement| Action| Expected Result| Actual Result
 TEST-001| REQ-001, REQ-002| Power on ESP32| NORMAL state, green LED ON, red LED OFF| Pending
-TEST-002| REQ-003, REQ-004, REQ-007| Press emergency button| EMERGENCY state, red LED ON, green LED OFF, UART message| Pending
-TEST-003| REQ-005| Release emergency button| Alert remains active| Pending
-TEST-004| REQ-006, REQ-007| Press reset button| NORMAL state restored, UART message| Pending
-TEST-005| REQ-003 to REQ-007| Repeat emergency/reset cycle 3 times| Consistent behavior on every cycle| Pending
+TEST-002| REQ-003, REQ-004, REQ-007| Press emergency button| EMERGENCY state, red LED ON, green LED OFF, UART message| 
+TEST-003| REQ-005| Release emergency button| Alert remains active| 
+TEST-004| REQ-006, REQ-007| Press reset button| NORMAL state restored, UART message| 
+TEST-005| REQ-003 to REQ-007| Repeat emergency/reset cycle 3 times| Consistent behavior on every cycle| 
 
 Evidence Checklist
 
-- [ ] FirmGen requirements reviewed and frozen
-- [ ] FirmGen traceability report exported
-- [ ] Firmware build successful
-- [ ] Firmware flashed to physical ESP32
-- [ ] UART serial monitor output captured
-- [ ] Hardware demonstration video recorded
-- [ ] Actual test results entered above
+- [x] FirmGen requirements reviewed and frozen
+- [x] FirmGen traceability report exported
+- [x] Firmware build successful
+- [x] Firmware flashed to physical ESP32
+- [x] UART serial monitor output captured
+- [x] Hardware demonstration video recorded
+- [x] Actual test results entered above
 
 Current Status
 
