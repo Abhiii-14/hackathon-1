@@ -14,11 +14,11 @@ Software Simulation
 
 FirmGen — Pending
 
-- [ ] FirmGen installed and launched
-- [ ] FirmGen project created
-- [ ] Requirements reviewed and frozen
-- [ ] Firmware generated and built
-- [ ] FirmGen traceability report exported
+- [x] FirmGen installed and launched
+- [x] FirmGen project created
+- [x] Requirements reviewed and frozen
+- [x] Firmware generated and built
+- [x] FirmGen traceability report exported
 
 Physical ESP32 — Pending
 
