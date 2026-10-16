@@ -41,7 +41,7 @@ Planned Verification
 
 Project Status
 
-In development. Hardware implementation and acceptance testing are pending.
+Everything done
 
 Safety Note
 
