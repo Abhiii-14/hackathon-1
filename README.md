@@ -1,4 +1,4 @@
-# hackathon-1
+
 SafeGuard ESP32 — Smart Industrial Emergency Alert System
 
 Project Overview
