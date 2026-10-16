@@ -3,9 +3,9 @@ SafeGuard ESP32 — Submission Checklist
 Documentation
 
 - [x] README.md created
-- [x] PRD.md created
-- [x] TEST_PLAN.md created
-- [x] FIRMGEN_PROMPT.md created
+- [x] prd.md created
+- [x] test_plan.md created
+- [x] firmgen_prompt.md created
 
 Software Simulation
 
