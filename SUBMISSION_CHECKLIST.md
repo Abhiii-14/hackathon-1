@@ -12,7 +12,7 @@ Software Simulation
 - [x] Python emergency/reset simulation created
 - [x] Automated simulation tests passed
 
-FirmGen — Pending
+FirmGen — Done
 
 - [x] FirmGen installed and launched
 - [x] FirmGen project created
