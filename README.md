@@ -47,5 +47,5 @@ Safety Note
 
 This is a hackathon prototype, not a certified industrial emergency-stop system.
 
-Final Reference Images are named as Emergency mode photo.jpeg and Normal mode photo.jpeg
-Video is named as Project Demo.mp4
+Final Reference Images are named as EmergencyModePhoto.jpeg and NormalModePhoto.jpeg
+Video is named as ProjectDemoVideo.mp4
