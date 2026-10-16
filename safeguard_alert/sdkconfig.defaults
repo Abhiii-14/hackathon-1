@@ -1,0 +1,2 @@
+# Auto-generated defaults for the standard project layout.
+CONFIG_IDF_TARGET="esp32"

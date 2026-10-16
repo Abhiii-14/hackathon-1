@@ -1,0 +1,18 @@
+{
+  "schema_version": "3.0.0",
+  "view": "lld",
+  "revision": "0c791a7023cbf22f3bd2ccf6129ad591",
+  "graph_version": 3,
+  "generated_at_ms": 1792166526321,
+  "mermaid": "flowchart TD\n    lld_t0_f1([\"Task safeguard_runtime_task<br/>safeguard_runtime_esp32.c:18\"])\n    lld_t0_f2[\"xTaskGetTickCount#40;#41;<br/>safeguard_runtime_esp32.c:21\"]\n    lld_t0_f3[\"Loop forever<br/>safeguard_runtime_esp32.c:23\"]\n    lld_t0_f4[\"runtime_callback#40;#41;<br/>safeguard_runtime_esp32.c:25\"]\n    lld_t0_f5(\"vTaskDelayUntil#40;&wake_tick#41;<br/>safeguard_runtime_esp32.c:26\")\n    lld_t0_f1 --> lld_t0_f2\n    lld_t0_f2 --> lld_t0_f3\n    lld_t0_f3 --> lld_t0_f4\n    lld_t0_f4 --> lld_t0_f5\n    lld_t0_f5 -.->|next cycle| lld_t0_f3\n    linkStyle 0 stroke:#8b949e,stroke-width:1.5px\n    linkStyle 1 stroke:#8b949e,stroke-width:1.5px\n    linkStyle 2 stroke:#8b949e,stroke-width:1.5px\n    linkStyle 3 stroke:#8b949e,stroke-width:1.5px\n    linkStyle 4 stroke:#a97fe0,stroke-width:2px\n    classDef lldEntry fill:#1f6feb,stroke:#4c8dff,color:#ffffff,stroke-width:2px\n    classDef lldDecision fill:#3a2f12,stroke:#d9a441,color:#f2e3c0,stroke-width:2px\n    classDef lldError fill:#3a1e12,stroke:#e2703a,color:#ffd9c7,stroke-width:2px\n    classDef lldOutput fill:#123324,stroke:#2ecf82,color:#c9f5e0,stroke-width:2px\n    classDef lldTx fill:#12283a,stroke:#4aa3df,color:#cfe8f7,stroke-width:2px\n    classDef lldTimer fill:#2b1f3a,stroke:#a97fe0,color:#e3d5f7,stroke-width:2px\n    class lld_t0_f1 lldEntry\n    class lld_t0_f5 lldTimer",
+  "title": "Low-Level Design (Firmware Workflow)",
+  "generation_error": "Showing the analysed-file fallback — the model pass failed: reply carried neither ===HLD===/===LLD===/===SEQ=== markers nor valid JSON (0 chars): no JSON object in agent output",
+  "node_notes": {
+    "lld_t0_f1": "Task safeguard_runtime_task is the entry of the safeguard task (safeguard_runtime_task). Evidence: safeguard_runtime_esp32.c:18",
+    "lld_t0_f5": "vTaskDelayUntil(&wake_tick) is a wait/timer in the safeguard task (safeguard_runtime_task). Evidence: safeguard_runtime_esp32.c:26",
+    "lld_t0_f2": "xTaskGetTickCount() is a step in the safeguard task (safeguard_runtime_task). Evidence: safeguard_runtime_esp32.c:21",
+    "lld_t0_f4": "runtime_callback() is a step in the safeguard task (safeguard_runtime_task). Evidence: safeguard_runtime_esp32.c:25",
+    "lld_t0_f3": "Loop forever is a step in the safeguard task (safeguard_runtime_task). Evidence: safeguard_runtime_esp32.c:23"
+  },
+  "authored_by_model": false
+}

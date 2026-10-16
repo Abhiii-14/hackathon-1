@@ -1,0 +1,11 @@
+{
+  "schema_version": "3.0.0",
+  "view": "sequence",
+  "revision": "0c791a7023cbf22f3bd2ccf6129ad591",
+  "graph_version": 3,
+  "generated_at_ms": 1792166526322,
+  "mermaid": "sequenceDiagram\n    autonumber\n    participant safeguard as Task safeguard\n    participant boot as Boot / app_main\n    boot->>safeguard: creates\n    loop task cycle\n        safeguard->>boot: xTaskGetTickCount()\n        safeguard->>boot: Loop forever\n        safeguard->>boot: runtime_callback()\n        safeguard->>boot: vTaskDelayUntil(&wake_tick)\n    end",
+  "title": "Sequence Diagram",
+  "generation_error": "Showing the analysed-file fallback — the model pass failed: reply carried neither ===HLD===/===LLD===/===SEQ=== markers nor valid JSON (0 chars): no JSON object in agent output",
+  "authored_by_model": false
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": "3.0.0",
+  "view": "hld",
+  "revision": "0c791a7023cbf22f3bd2ccf6129ad591",
+  "graph_version": 3,
+  "generated_at_ms": 1792166526321,
+  "mermaid": "flowchart TD\n    subgraph hld_lane_utility[\"Utilities\"]\n        utils_helpers[\"utils/helpers<br/>utility · 2 files\"]\n        utils_logger[\"utils/logger<br/>utility · 2 files\"]\n    end\n    subgraph hld_lane_hardware[\"Hardware\"]\n        hw_emergency_button_gpio[\"EMERGENCY BUTTON GPIO #40;GPIO 18, APP_EMERGENCY_BUTTON_GPIO#41;<br/>pin=18\"]\n        hw_emergency_led_gpio[\"EMERGENCY LED GPIO #40;GPIO 26, APP_EMERGENCY_LED_GPIO#41;<br/>pin=26\"]\n        hw_reset_button_gpio[\"RESET BUTTON GPIO #40;GPIO 19, APP_RESET_BUTTON_GPIO#41;<br/>pin=19\"]\n        hw_safe_led_gpio[\"SAFE LED GPIO #40;GPIO 25, APP_SAFE_LED_GPIO#41;<br/>pin=25\"]\n    end\n    main([\"main<br/>entrypoint · 1 file\"])\n    app[\"app<br/>application · 2 files\"]\n    platforms_esp32[[\"platforms/esp32<br/>platform · 3 files\"]]\n    bsp[\"bsp<br/>board · 2 files\"]\n    osal[\"osal<br/>abstraction · 1 file\"]\n    configs[(\"configs<br/>configuration · 4 files\")]\n    interfaces[\"interfaces<br/>module · 2 files\"]\n    modules[\"modules<br/>module · 2 files\"]\n    services[\"services<br/>module · 2 files\"]\n    app -->|safeguard_service.h| services\n    app -->|logger.h| utils_logger\n    bsp -->|app_config.h| configs\n    interfaces -->|safeguard_logic.h| modules\n    main -->|app.h| app\n    platforms_esp32 -->|board.h| bsp\n    platforms_esp32 -->|app_config.h| configs\n    platforms_esp32 -->|safeguard_io_if.h| interfaces\n    services -->|app_config.h| configs\n    services -->|safeguard_io_if.h| interfaces\n    services -->|safeguard_logic.h| modules\n    services -->|logger.h| utils_logger\n    app -->|pin #40;18#41;| hw_emergency_button_gpio\n    app -->|pin #40;26#41;| hw_emergency_led_gpio\n    app -->|pin #40;19#41;| hw_reset_button_gpio\n    app -->|pin #40;25#41;| hw_safe_led_gpio\n    classDef hldEntrypoint fill:#1f6feb,stroke:#4c8dff,color:#ffffff,stroke-width:2px\n    classDef hldApplication fill:#123324,stroke:#2ecf82,color:#c9f5e0,stroke-width:2px\n    classDef hldDriver fill:#12283a,stroke:#4aa3df,color:#cfe8f7,stroke-width:2px\n    classDef hldPlatform fill:#2b1f3a,stroke:#a97fe0,color:#e3d5f7,stroke-width:2px\n    classDef hldBoard fill:#3a1e12,stroke:#e2703a,color:#ffd9c7,stroke-width:2px\n    classDef hldUtility fill:#22262b,stroke:#8b949e,color:#d6dde5,stroke-width:2px\n    classDef hldConfiguration fill:#3a2f12,stroke:#d9a441,color:#f2e3c0,stroke-width:2px\n    classDef hldHardware fill:#3a1e12,stroke:#e2703a,color:#ffd9c7,stroke-width:2px\n    classDef hldNetwork fill:#12283a,stroke:#4aa3df,color:#cfe8f7,stroke-width:2px\n    classDef hldSink fill:#123324,stroke:#2ecf82,color:#c9f5e0,stroke-width:2px\n    class main hldEntrypoint\n    class app hldApplication\n    class platforms_esp32 hldPlatform\n    class bsp hldBoard\n    class osal hldPlatform\n    class utils_helpers hldUtility\n    class utils_logger hldUtility\n    class configs hldConfiguration\n    class hw_emergency_button_gpio hldHardware\n    class hw_emergency_led_gpio hldHardware\n    class hw_reset_button_gpio hldHardware\n    class hw_safe_led_gpio hldHardware",
+  "title": "High-Level Design",
+  "generation_error": "Showing the analysed-file fallback — the model pass failed: reply carried neither ===HLD===/===LLD===/===SEQ=== markers nor valid JSON (0 chars): no JSON object in agent output",
+  "node_notes": {
+    "utils_logger": "utils/logger is a utility module at utils/logger. It owns 2 source files this architecture is built from.",
+    "hw_safe_led_gpio": "SAFE LED GPIO (GPIO 25, APP_SAFE_LED_GPIO) is a step in this firmware's runtime flow. The cite pin=25 is the source evidence for it.",
+    "main": "main is a entrypoint module at main. It owns 1 source file this architecture is built from.",
+    "interfaces": "interfaces is a module module at interfaces. It owns 2 source files this architecture is built from.",
+    "modules": "modules is a module module at modules. It owns 2 source files this architecture is built from.",
+    "osal": "osal is a abstraction module at osal. It owns 1 source file this architecture is built from.",
+    "configs": "configs is a configuration module at configs. It owns 4 source files this architecture is built from.",
+    "hw_reset_button_gpio": "RESET BUTTON GPIO (GPIO 19, APP_RESET_BUTTON_GPIO) is a step in this firmware's runtime flow. The cite pin=19 is the source evidence for it.",
+    "platforms_esp32": "platforms/esp32 is a platform module at platforms/esp32. It owns 3 source files this architecture is built from.",
+    "bsp": "bsp is a board module at bsp. It owns 2 source files this architecture is built from.",
+    "hw_emergency_button_gpio": "EMERGENCY BUTTON GPIO (GPIO 18, APP_EMERGENCY_BUTTON_GPIO) is a step in this firmware's runtime flow. The cite pin=18 is the source evidence for it.",
+    "hw_emergency_led_gpio": "EMERGENCY LED GPIO (GPIO 26, APP_EMERGENCY_LED_GPIO) is a step in this firmware's runtime flow. The cite pin=26 is the source evidence for it.",
+    "services": "services is a module module at services. It owns 2 source files this architecture is built from.",
+    "utils_helpers": "utils/helpers is a utility module at utils/helpers. It owns 2 source files this architecture is built from.",
+    "app": "app is a application module at app. It owns 2 source files this architecture is built from."
+  },
+  "authored_by_model": false
+}

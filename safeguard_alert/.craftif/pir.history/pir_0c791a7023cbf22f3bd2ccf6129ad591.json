@@ -1,0 +1,821 @@
+{
+  "schema_version": "2.1.0",
+  "id": "pir_safeguard_alert",
+  "revision": "0c791a7023cbf22f3bd2ccf6129ad591",
+  "provenance": {
+    "project_path": "C:\\FirmGen\\project_1\\safeguard_alert",
+    "chat_id": "9030f2f5-75c3-4904-a91e-ad74206c30dd",
+    "revision": "0c791a7023cbf22f3bd2ccf6129ad591",
+    "generated_at_ms": 1792166463638,
+    "analyzer_version": "pir_maker-static-0.13.0",
+    "analyzed_files": [
+      "CMakeLists.txt",
+      "firmware/app/app.c",
+      "firmware/app/app.h",
+      "firmware/bsp/board.c",
+      "firmware/bsp/board.h",
+      "firmware/configs/app_config.h",
+      "firmware/configs/build_config.h",
+      "firmware/configs/feature_config.h",
+      "firmware/configs/platform_config.h",
+      "firmware/interfaces/safeguard_io_if.h",
+      "firmware/interfaces/safeguard_runtime_if.h",
+      "firmware/modules/safeguard_logic.c",
+      "firmware/modules/safeguard_logic.h",
+      "firmware/osal/osal.h",
+      "firmware/platforms/esp32/safeguard_io_esp32.c",
+      "firmware/platforms/esp32/safeguard_runtime_esp32.c",
+      "firmware/platforms/esp32/safeguard_runtime_esp32.h",
+      "firmware/services/safeguard_service.c",
+      "firmware/services/safeguard_service.h",
+      "firmware/utils/helpers/helpers.c",
+      "firmware/utils/helpers/helpers.h",
+      "firmware/utils/logger/logger.c",
+      "firmware/utils/logger/logger.h",
+      "main/entry.c",
+      "sdkconfig",
+      "sdkconfig.defaults"
+    ],
+    "file_hashes": {
+      "firmware/interfaces/safeguard_runtime_if.h": "10c9f62f5b364d777bfbefdfc8955305",
+      "firmware/configs/platform_config.h": "010b01144dbd2d3fb63f3053b158ab7a",
+      "firmware/platforms/esp32/safeguard_runtime_esp32.h": "b6ee3a9ca0756fc912f1864328af59ce",
+      "firmware/services/safeguard_service.h": "427905ba4285b14f9f0cef9e41f04f5c",
+      "firmware/utils/logger/logger.c": "8e992fef35c9a4678ec38e60902d741d",
+      "firmware/bsp/board.c": "e630056f89563be97755fb3703f3a541",
+      "firmware/platforms/esp32/safeguard_io_esp32.c": "872941c9a44fc0f67b50e61e6aaecc39",
+      "firmware/modules/safeguard_logic.h": "52a179d0d69f34697e24bfc65ac15b8f",
+      "firmware/utils/helpers/helpers.c": "914568ab7415fec17e74f306cbb5ae09",
+      "firmware/configs/feature_config.h": "08ef51c6dfb8aa157bd736ea8388e0ba",
+      "sdkconfig.defaults": "bf25801b95b74624f317994a32904ca6",
+      "firmware/osal/osal.h": "9e93e5096d971aa31beb162503c0e4f3",
+      "main/entry.c": "86aaa3bc61772628c601798f4d9dea56",
+      "firmware/platforms/esp32/safeguard_runtime_esp32.c": "44ae428df7d313c5f72389e705f0ab5f",
+      "firmware/configs/build_config.h": "dd997e9a0a461df28c370a61963fd7e5",
+      "firmware/configs/app_config.h": "27ed5fb47f1bdcbc577fa8884cd7a5e9",
+      "firmware/app/app.c": "c091094bcc32f4d14f1d0e34d6cff11f",
+      "firmware/app/app.h": "ebc6cfe87fb8e2ab299633dd7a067f3b",
+      "firmware/bsp/board.h": "a1080aa16d3227b8dd5d28791bbe5e3b",
+      "firmware/modules/safeguard_logic.c": "c3840ee2a74d3cca52253073cf1dcb45",
+      "firmware/services/safeguard_service.c": "8cc46218f0fa63eb4b3612eb29a30b1c",
+      "CMakeLists.txt": "5a4dceda080418a96a94641eec4b998b",
+      "firmware/utils/helpers/helpers.h": "ec8b635b7e5b55f8aeb8f47c3ff34312",
+      "firmware/utils/logger/logger.h": "2c284c641c88c6a4fff52db62e8d1ea5",
+      "sdkconfig": "b309b4cbd80038668c572b9d8c4d3e13",
+      "firmware/interfaces/safeguard_io_if.h": "083f4d95c4072c7ba1ccb8c8d9c60e0d"
+    },
+    "board_id": "ESP32-DevKitC",
+    "target_chip": "esp32",
+    "config_hash": "sdkconfig.defaults:bf25801b95b74624f317994a32904ca6|sdkconfig:b309b4cbd80038668c572b9d8c4d3e13",
+    "feature_flags": "mode=hybrid;refine=true"
+  },
+  "approval": {
+    "status": "pending"
+  },
+  "nodes": [
+    {
+      "id": "boot",
+      "node_type": "system_init",
+      "label": "Boot / app_main",
+      "properties": {
+        "target": "esp32"
+      },
+      "source_refs": [
+        {
+          "file": "main/entry.c",
+          "confidence": 1.0,
+          "inferred_by": "static"
+        }
+      ],
+      "sync": {
+        "state": "synced",
+        "last_synced_revision": "0c791a7023cbf22f3bd2ccf6129ad591"
+      },
+      "ownership": {
+        "primary_files": [
+          "main/entry.c"
+        ]
+      },
+      "editable_fields": [
+        "log_level"
+      ],
+      "layer": "system",
+      "ai_summary": "Bootstraps firmware startup and initializes core subsystems.",
+      "confidence": 1.0,
+      "authority": "agent",
+      "semantic_tags": [],
+      "dependencies": []
+    },
+    {
+      "id": "emergency_button_gpio",
+      "node_type": "gpio_input",
+      "label": "EMERGENCY BUTTON GPIO (GPIO 18, APP_EMERGENCY_BUTTON_GPIO)",
+      "properties": {
+        "pin": 18
+      },
+      "source_refs": [
+        {
+          "file": "firmware/configs/app_config.h",
+          "confidence": 1.0,
+          "inferred_by": "static"
+        }
+      ],
+      "sync": {
+        "state": "synced",
+        "last_synced_revision": "0c791a7023cbf22f3bd2ccf6129ad591"
+      },
+      "ownership": {
+        "primary_files": [
+          "firmware/configs/app_config.h"
+        ]
+      },
+      "editable_fields": [
+        "pin"
+      ],
+      "layer": "physical",
+      "ai_summary": "Reads GPIO 18 as an input signal.",
+      "confidence": 1.0,
+      "authority": "agent",
+      "semantic_tags": [],
+      "dependencies": []
+    },
+    {
+      "id": "reset_button_gpio",
+      "node_type": "gpio_input",
+      "label": "RESET BUTTON GPIO (GPIO 19, APP_RESET_BUTTON_GPIO)",
+      "properties": {
+        "pin": 19
+      },
+      "source_refs": [
+        {
+          "file": "firmware/configs/app_config.h",
+          "confidence": 1.0,
+          "inferred_by": "static"
+        }
+      ],
+      "sync": {
+        "state": "synced",
+        "last_synced_revision": "0c791a7023cbf22f3bd2ccf6129ad591"
+      },
+      "ownership": {
+        "primary_files": [
+          "firmware/configs/app_config.h"
+        ]
+      },
+      "editable_fields": [
+        "pin"
+      ],
+      "layer": "physical",
+      "ai_summary": "Reads GPIO 19 as an input signal.",
+      "confidence": 1.0,
+      "authority": "agent",
+      "semantic_tags": [],
+      "dependencies": []
+    },
+    {
+      "id": "safe_led_gpio",
+      "node_type": "gpio_output",
+      "label": "SAFE LED GPIO (GPIO 25, APP_SAFE_LED_GPIO)",
+      "properties": {
+        "pin": 25
+      },
+      "source_refs": [
+        {
+          "file": "firmware/configs/app_config.h",
+          "confidence": 1.0,
+          "inferred_by": "static"
+        }
+      ],
+      "sync": {
+        "state": "synced",
+        "last_synced_revision": "0c791a7023cbf22f3bd2ccf6129ad591"
+      },
+      "ownership": {
+        "primary_files": [
+          "firmware/configs/app_config.h"
+        ]
+      },
+      "editable_fields": [
+        "pin"
+      ],
+      "layer": "physical",
+      "ai_summary": "Drives GPIO 25 as an output signal.",
+      "confidence": 1.0,
+      "authority": "agent",
+      "semantic_tags": [],
+      "dependencies": []
+    },
+    {
+      "id": "emergency_led_gpio",
+      "node_type": "gpio_output",
+      "label": "EMERGENCY LED GPIO (GPIO 26, APP_EMERGENCY_LED_GPIO)",
+      "properties": {
+        "pin": 26
+      },
+      "source_refs": [
+        {
+          "file": "firmware/configs/app_config.h",
+          "confidence": 1.0,
+          "inferred_by": "static"
+        }
+      ],
+      "sync": {
+        "state": "synced",
+        "last_synced_revision": "0c791a7023cbf22f3bd2ccf6129ad591"
+      },
+      "ownership": {
+        "primary_files": [
+          "firmware/configs/app_config.h"
+        ]
+      },
+      "editable_fields": [
+        "pin"
+      ],
+      "layer": "physical",
+      "ai_summary": "Drives GPIO 26 as an output signal.",
+      "confidence": 1.0,
+      "authority": "agent",
+      "semantic_tags": [],
+      "dependencies": []
+    },
+    {
+      "id": "safeguard",
+      "node_type": "rtos_task",
+      "label": "Task safeguard",
+      "properties": {
+        "task_name": "safeguard",
+        "priority": 5,
+        "stack_size": 4096,
+        "period_ms": 0.0
+      },
+      "source_refs": [
+        {
+          "file": "firmware/platforms/esp32/safeguard_runtime_esp32.c",
+          "confidence": 1.0,
+          "inferred_by": "static"
+        }
+      ],
+      "sync": {
+        "state": "synced",
+        "last_synced_revision": "0c791a7023cbf22f3bd2ccf6129ad591"
+      },
+      "ownership": {
+        "primary_files": [
+          "firmware/platforms/esp32/safeguard_runtime_esp32.c"
+        ]
+      },
+      "editable_fields": [
+        "task_name",
+        "priority",
+        "stack_size",
+        "period_ms"
+      ],
+      "layer": "runtime",
+      "ai_summary": "Executes RTOS loop logic for safeguard.",
+      "confidence": 1.0,
+      "authority": "agent",
+      "semantic_tags": [],
+      "dependencies": []
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_boot_safeguard_spawns",
+      "source_node_id": "boot",
+      "target_node_id": "safeguard",
+      "kind": "execution",
+      "confidence": 1.0,
+      "source_refs": [
+        {
+          "file": "firmware/platforms/esp32/safeguard_runtime_esp32.c",
+          "line": 40,
+          "symbol": "safeguard",
+          "confidence": 1.0,
+          "inferred_by": "static"
+        }
+      ],
+      "semantic_label": "spawns",
+      "validated": false
+    },
+    {
+      "id": "e_safeguard_reads_emergency_button",
+      "source_node_id": "safeguard",
+      "target_node_id": "emergency_button_gpio",
+      "kind": "hardware",
+      "confidence": 0.99,
+      "source_refs": [
+        {
+          "file": "firmware/platforms/esp32/safeguard_io_esp32.c",
+          "symbol": "safeguard_io_read_buttons",
+          "confidence": 1.0,
+          "inferred_by": "static"
+        }
+      ],
+      "semantic_label": "reads",
+      "validated": false
+    },
+    {
+      "id": "e_safeguard_reads_reset_button",
+      "source_node_id": "safeguard",
+      "target_node_id": "reset_button_gpio",
+      "kind": "hardware",
+      "confidence": 0.99,
+      "source_refs": [
+        {
+          "file": "firmware/platforms/esp32/safeguard_io_esp32.c",
+          "symbol": "safeguard_io_read_buttons",
+          "confidence": 1.0,
+          "inferred_by": "static"
+        }
+      ],
+      "semantic_label": "reads",
+      "validated": false
+    },
+    {
+      "id": "e_safeguard_drives_safe_led",
+      "source_node_id": "safeguard",
+      "target_node_id": "safe_led_gpio",
+      "kind": "hardware",
+      "confidence": 0.99,
+      "source_refs": [
+        {
+          "file": "firmware/platforms/esp32/safeguard_io_esp32.c",
+          "symbol": "safeguard_io_init",
+          "confidence": 1.0,
+          "inferred_by": "static"
+        },
+        {
+          "file": "firmware/platforms/esp32/safeguard_io_esp32.c",
+          "symbol": "safeguard_io_set_state",
+          "confidence": 1.0,
+          "inferred_by": "static"
+        }
+      ],
+      "semantic_label": "drives",
+      "validated": false
+    },
+    {
+      "id": "e_safeguard_drives_emergency_led",
+      "source_node_id": "safeguard",
+      "target_node_id": "emergency_led_gpio",
+      "kind": "hardware",
+      "confidence": 0.99,
+      "source_refs": [
+        {
+          "file": "firmware/platforms/esp32/safeguard_io_esp32.c",
+          "symbol": "safeguard_io_init",
+          "confidence": 1.0,
+          "inferred_by": "static"
+        },
+        {
+          "file": "firmware/platforms/esp32/safeguard_io_esp32.c",
+          "symbol": "safeguard_io_set_state",
+          "confidence": 1.0,
+          "inferred_by": "static"
+        }
+      ],
+      "semantic_label": "drives",
+      "validated": false
+    }
+  ],
+  "layers": {
+    "physical": [
+      "emergency_button_gpio",
+      "reset_button_gpio",
+      "safe_led_gpio",
+      "emergency_led_gpio"
+    ],
+    "runtime": [
+      "safeguard"
+    ],
+    "network": [],
+    "system": [
+      "boot"
+    ]
+  },
+  "partitions": [],
+  "components": [
+    {
+      "id": "main",
+      "path": "main/CMakeLists.txt",
+      "requires": [
+        "esp_driver_gpio",
+        "esp_timer",
+        "esp_wifi",
+        "esp_event",
+        "nvs_flash",
+        "freertos",
+        "log"
+      ],
+      "source_files": []
+    }
+  ],
+  "modules": [
+    {
+      "id": "app",
+      "label": "app",
+      "path": "app",
+      "kind": "application",
+      "files": [
+        "firmware/app/app.c",
+        "firmware/app/app.h"
+      ]
+    },
+    {
+      "id": "bsp",
+      "label": "bsp",
+      "path": "bsp",
+      "kind": "board",
+      "files": [
+        "firmware/bsp/board.c",
+        "firmware/bsp/board.h"
+      ]
+    },
+    {
+      "id": "configs",
+      "label": "configs",
+      "path": "configs",
+      "kind": "configuration",
+      "files": [
+        "firmware/configs/app_config.h",
+        "firmware/configs/build_config.h",
+        "firmware/configs/feature_config.h",
+        "firmware/configs/platform_config.h"
+      ]
+    },
+    {
+      "id": "interfaces",
+      "label": "interfaces",
+      "path": "interfaces",
+      "kind": "module",
+      "files": [
+        "firmware/interfaces/safeguard_io_if.h",
+        "firmware/interfaces/safeguard_runtime_if.h"
+      ]
+    },
+    {
+      "id": "main",
+      "label": "main",
+      "path": "main",
+      "kind": "entrypoint",
+      "files": [
+        "main/entry.c"
+      ]
+    },
+    {
+      "id": "modules",
+      "label": "modules",
+      "path": "modules",
+      "kind": "module",
+      "files": [
+        "firmware/modules/safeguard_logic.c",
+        "firmware/modules/safeguard_logic.h"
+      ]
+    },
+    {
+      "id": "osal",
+      "label": "osal",
+      "path": "osal",
+      "kind": "abstraction",
+      "files": [
+        "firmware/osal/osal.h"
+      ]
+    },
+    {
+      "id": "platforms_esp32",
+      "label": "platforms/esp32",
+      "path": "platforms/esp32",
+      "kind": "platform",
+      "files": [
+        "firmware/platforms/esp32/safeguard_io_esp32.c",
+        "firmware/platforms/esp32/safeguard_runtime_esp32.c",
+        "firmware/platforms/esp32/safeguard_runtime_esp32.h"
+      ]
+    },
+    {
+      "id": "services",
+      "label": "services",
+      "path": "services",
+      "kind": "module",
+      "files": [
+        "firmware/services/safeguard_service.c",
+        "firmware/services/safeguard_service.h"
+      ]
+    },
+    {
+      "id": "utils_helpers",
+      "label": "utils/helpers",
+      "path": "utils/helpers",
+      "kind": "utility",
+      "files": [
+        "firmware/utils/helpers/helpers.c",
+        "firmware/utils/helpers/helpers.h"
+      ]
+    },
+    {
+      "id": "utils_logger",
+      "label": "utils/logger",
+      "path": "utils/logger",
+      "kind": "utility",
+      "files": [
+        "firmware/utils/logger/logger.c",
+        "firmware/utils/logger/logger.h"
+      ]
+    }
+  ],
+  "module_deps": [
+    {
+      "from": "app",
+      "to": "services",
+      "via": "include",
+      "file": "firmware/app/app.c",
+      "line": 5,
+      "symbol": "safeguard_service.h"
+    },
+    {
+      "from": "app",
+      "to": "utils_logger",
+      "via": "include",
+      "file": "firmware/app/app.c",
+      "line": 4,
+      "symbol": "logger.h"
+    },
+    {
+      "from": "bsp",
+      "to": "configs",
+      "via": "include",
+      "file": "firmware/bsp/board.h",
+      "line": 18,
+      "symbol": "app_config.h"
+    },
+    {
+      "from": "interfaces",
+      "to": "modules",
+      "via": "include",
+      "file": "firmware/interfaces/safeguard_io_if.h",
+      "line": 6,
+      "symbol": "safeguard_logic.h"
+    },
+    {
+      "from": "main",
+      "to": "app",
+      "via": "include",
+      "file": "main/entry.c",
+      "line": 2,
+      "symbol": "app.h"
+    },
+    {
+      "from": "platforms_esp32",
+      "to": "bsp",
+      "via": "include",
+      "file": "firmware/platforms/esp32/safeguard_io_esp32.c",
+      "line": 7,
+      "symbol": "board.h"
+    },
+    {
+      "from": "platforms_esp32",
+      "to": "configs",
+      "via": "include",
+      "file": "firmware/platforms/esp32/safeguard_io_esp32.c",
+      "line": 6,
+      "symbol": "app_config.h"
+    },
+    {
+      "from": "platforms_esp32",
+      "to": "interfaces",
+      "via": "include",
+      "file": "firmware/platforms/esp32/safeguard_io_esp32.c",
+      "line": 2,
+      "symbol": "safeguard_io_if.h"
+    },
+    {
+      "from": "services",
+      "to": "configs",
+      "via": "include",
+      "file": "firmware/services/safeguard_service.c",
+      "line": 4,
+      "symbol": "app_config.h"
+    },
+    {
+      "from": "services",
+      "to": "interfaces",
+      "via": "include",
+      "file": "firmware/services/safeguard_service.c",
+      "line": 6,
+      "symbol": "safeguard_io_if.h"
+    },
+    {
+      "from": "services",
+      "to": "modules",
+      "via": "include",
+      "file": "firmware/services/safeguard_service.c",
+      "line": 7,
+      "symbol": "safeguard_logic.h"
+    },
+    {
+      "from": "services",
+      "to": "utils_logger",
+      "via": "include",
+      "file": "firmware/services/safeguard_service.c",
+      "line": 5,
+      "symbol": "logger.h"
+    }
+  ],
+  "task_flows": [
+    {
+      "task_node_id": "safeguard",
+      "task_label": "safeguard",
+      "entry_fn": "safeguard_runtime_task",
+      "nodes": [
+        {
+          "id": "f1",
+          "label": "Task safeguard_runtime_task",
+          "kind": "entry",
+          "file": "firmware/platforms/esp32/safeguard_runtime_esp32.c",
+          "line": 18
+        },
+        {
+          "id": "f2",
+          "label": "xTaskGetTickCount()",
+          "kind": "step",
+          "file": "firmware/platforms/esp32/safeguard_runtime_esp32.c",
+          "line": 21
+        },
+        {
+          "id": "f3",
+          "label": "Loop forever",
+          "kind": "step",
+          "file": "firmware/platforms/esp32/safeguard_runtime_esp32.c",
+          "line": 23
+        },
+        {
+          "id": "f4",
+          "label": "runtime_callback()",
+          "kind": "step",
+          "file": "firmware/platforms/esp32/safeguard_runtime_esp32.c",
+          "line": 25
+        },
+        {
+          "id": "f5",
+          "label": "vTaskDelayUntil(&wake_tick)",
+          "kind": "timer",
+          "file": "firmware/platforms/esp32/safeguard_runtime_esp32.c",
+          "line": 26
+        }
+      ],
+      "edges": [
+        {
+          "from": "f1",
+          "to": "f2",
+          "label": "",
+          "loop_back": false
+        },
+        {
+          "from": "f2",
+          "to": "f3",
+          "label": "",
+          "loop_back": false
+        },
+        {
+          "from": "f3",
+          "to": "f4",
+          "label": "",
+          "loop_back": false
+        },
+        {
+          "from": "f4",
+          "to": "f5",
+          "label": "",
+          "loop_back": false
+        },
+        {
+          "from": "f5",
+          "to": "f3",
+          "label": "next cycle",
+          "loop_back": true
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "headline": "GPIO configuration gaps map to existing button and LED nodes; no additional nodes are needed.",
+    "node_count": 0,
+    "edge_count": 0,
+    "warnings": []
+  },
+  "diagrams": {
+    "hld": {
+      "title": "High-Level Design",
+      "mermaid": "flowchart TD\n    subgraph hld_lane_utility[\"Utilities\"]\n        utils_helpers[\"utils/helpers<br/>utility · 2 files\"]\n        utils_logger[\"utils/logger<br/>utility · 2 files\"]\n    end\n    subgraph hld_lane_hardware[\"Hardware\"]\n        hw_emergency_button_gpio[\"EMERGENCY BUTTON GPIO #40;GPIO 18, APP_EMERGENCY_BUTTON_GPIO#41;<br/>pin=18\"]\n        hw_emergency_led_gpio[\"EMERGENCY LED GPIO #40;GPIO 26, APP_EMERGENCY_LED_GPIO#41;<br/>pin=26\"]\n        hw_reset_button_gpio[\"RESET BUTTON GPIO #40;GPIO 19, APP_RESET_BUTTON_GPIO#41;<br/>pin=19\"]\n        hw_safe_led_gpio[\"SAFE LED GPIO #40;GPIO 25, APP_SAFE_LED_GPIO#41;<br/>pin=25\"]\n    end\n    main([\"main<br/>entrypoint · 1 file\"])\n    app[\"app<br/>application · 2 files\"]\n    platforms_esp32[[\"platforms/esp32<br/>platform · 3 files\"]]\n    bsp[\"bsp<br/>board · 2 files\"]\n    osal[\"osal<br/>abstraction · 1 file\"]\n    configs[(\"configs<br/>configuration · 4 files\")]\n    interfaces[\"interfaces<br/>module · 2 files\"]\n    modules[\"modules<br/>module · 2 files\"]\n    services[\"services<br/>module · 2 files\"]\n    app -->|safeguard_service.h| services\n    app -->|logger.h| utils_logger\n    bsp -->|app_config.h| configs\n    interfaces -->|safeguard_logic.h| modules\n    main -->|app.h| app\n    platforms_esp32 -->|board.h| bsp\n    platforms_esp32 -->|app_config.h| configs\n    platforms_esp32 -->|safeguard_io_if.h| interfaces\n    services -->|app_config.h| configs\n    services -->|safeguard_io_if.h| interfaces\n    services -->|safeguard_logic.h| modules\n    services -->|logger.h| utils_logger\n    app -->|pin #40;18#41;| hw_emergency_button_gpio\n    app -->|pin #40;26#41;| hw_emergency_led_gpio\n    app -->|pin #40;19#41;| hw_reset_button_gpio\n    app -->|pin #40;25#41;| hw_safe_led_gpio\n    classDef hldEntrypoint fill:#1f6feb,stroke:#4c8dff,color:#ffffff,stroke-width:2px\n    classDef hldApplication fill:#123324,stroke:#2ecf82,color:#c9f5e0,stroke-width:2px\n    classDef hldDriver fill:#12283a,stroke:#4aa3df,color:#cfe8f7,stroke-width:2px\n    classDef hldPlatform fill:#2b1f3a,stroke:#a97fe0,color:#e3d5f7,stroke-width:2px\n    classDef hldBoard fill:#3a1e12,stroke:#e2703a,color:#ffd9c7,stroke-width:2px\n    classDef hldUtility fill:#22262b,stroke:#8b949e,color:#d6dde5,stroke-width:2px\n    classDef hldConfiguration fill:#3a2f12,stroke:#d9a441,color:#f2e3c0,stroke-width:2px\n    classDef hldHardware fill:#3a1e12,stroke:#e2703a,color:#ffd9c7,stroke-width:2px\n    classDef hldNetwork fill:#12283a,stroke:#4aa3df,color:#cfe8f7,stroke-width:2px\n    classDef hldSink fill:#123324,stroke:#2ecf82,color:#c9f5e0,stroke-width:2px\n    class main hldEntrypoint\n    class app hldApplication\n    class platforms_esp32 hldPlatform\n    class bsp hldBoard\n    class osal hldPlatform\n    class utils_helpers hldUtility\n    class utils_logger hldUtility\n    class configs hldConfiguration\n    class hw_emergency_button_gpio hldHardware\n    class hw_emergency_led_gpio hldHardware\n    class hw_reset_button_gpio hldHardware\n    class hw_safe_led_gpio hldHardware",
+      "generation_error": "Showing the analysed-file fallback — the model pass failed: reply carried neither ===HLD===/===LLD===/===SEQ=== markers nor valid JSON (0 chars): no JSON object in agent output",
+      "authored_by_model": false,
+      "node_notes": {
+        "utils_logger": "utils/logger is a utility module at utils/logger. It owns 2 source files this architecture is built from.",
+        "hw_safe_led_gpio": "SAFE LED GPIO (GPIO 25, APP_SAFE_LED_GPIO) is a step in this firmware's runtime flow. The cite pin=25 is the source evidence for it.",
+        "main": "main is a entrypoint module at main. It owns 1 source file this architecture is built from.",
+        "interfaces": "interfaces is a module module at interfaces. It owns 2 source files this architecture is built from.",
+        "modules": "modules is a module module at modules. It owns 2 source files this architecture is built from.",
+        "osal": "osal is a abstraction module at osal. It owns 1 source file this architecture is built from.",
+        "configs": "configs is a configuration module at configs. It owns 4 source files this architecture is built from.",
+        "hw_reset_button_gpio": "RESET BUTTON GPIO (GPIO 19, APP_RESET_BUTTON_GPIO) is a step in this firmware's runtime flow. The cite pin=19 is the source evidence for it.",
+        "platforms_esp32": "platforms/esp32 is a platform module at platforms/esp32. It owns 3 source files this architecture is built from.",
+        "bsp": "bsp is a board module at bsp. It owns 2 source files this architecture is built from.",
+        "hw_emergency_button_gpio": "EMERGENCY BUTTON GPIO (GPIO 18, APP_EMERGENCY_BUTTON_GPIO) is a step in this firmware's runtime flow. The cite pin=18 is the source evidence for it.",
+        "hw_emergency_led_gpio": "EMERGENCY LED GPIO (GPIO 26, APP_EMERGENCY_LED_GPIO) is a step in this firmware's runtime flow. The cite pin=26 is the source evidence for it.",
+        "services": "services is a module module at services. It owns 2 source files this architecture is built from.",
+        "utils_helpers": "utils/helpers is a utility module at utils/helpers. It owns 2 source files this architecture is built from.",
+        "app": "app is a application module at app. It owns 2 source files this architecture is built from."
+      }
+    },
+    "lld": {
+      "title": "Low-Level Design (Firmware Workflow)",
+      "mermaid": "flowchart TD\n    lld_t0_f1([\"Task safeguard_runtime_task<br/>safeguard_runtime_esp32.c:18\"])\n    lld_t0_f2[\"xTaskGetTickCount#40;#41;<br/>safeguard_runtime_esp32.c:21\"]\n    lld_t0_f3[\"Loop forever<br/>safeguard_runtime_esp32.c:23\"]\n    lld_t0_f4[\"runtime_callback#40;#41;<br/>safeguard_runtime_esp32.c:25\"]\n    lld_t0_f5(\"vTaskDelayUntil#40;&wake_tick#41;<br/>safeguard_runtime_esp32.c:26\")\n    lld_t0_f1 --> lld_t0_f2\n    lld_t0_f2 --> lld_t0_f3\n    lld_t0_f3 --> lld_t0_f4\n    lld_t0_f4 --> lld_t0_f5\n    lld_t0_f5 -.->|next cycle| lld_t0_f3\n    linkStyle 0 stroke:#8b949e,stroke-width:1.5px\n    linkStyle 1 stroke:#8b949e,stroke-width:1.5px\n    linkStyle 2 stroke:#8b949e,stroke-width:1.5px\n    linkStyle 3 stroke:#8b949e,stroke-width:1.5px\n    linkStyle 4 stroke:#a97fe0,stroke-width:2px\n    classDef lldEntry fill:#1f6feb,stroke:#4c8dff,color:#ffffff,stroke-width:2px\n    classDef lldDecision fill:#3a2f12,stroke:#d9a441,color:#f2e3c0,stroke-width:2px\n    classDef lldError fill:#3a1e12,stroke:#e2703a,color:#ffd9c7,stroke-width:2px\n    classDef lldOutput fill:#123324,stroke:#2ecf82,color:#c9f5e0,stroke-width:2px\n    classDef lldTx fill:#12283a,stroke:#4aa3df,color:#cfe8f7,stroke-width:2px\n    classDef lldTimer fill:#2b1f3a,stroke:#a97fe0,color:#e3d5f7,stroke-width:2px\n    class lld_t0_f1 lldEntry\n    class lld_t0_f5 lldTimer",
+      "generation_error": "Showing the analysed-file fallback — the model pass failed: reply carried neither ===HLD===/===LLD===/===SEQ=== markers nor valid JSON (0 chars): no JSON object in agent output",
+      "authored_by_model": false,
+      "node_notes": {
+        "lld_t0_f1": "Task safeguard_runtime_task is the entry of the safeguard task (safeguard_runtime_task). Evidence: safeguard_runtime_esp32.c:18",
+        "lld_t0_f5": "vTaskDelayUntil(&wake_tick) is a wait/timer in the safeguard task (safeguard_runtime_task). Evidence: safeguard_runtime_esp32.c:26",
+        "lld_t0_f2": "xTaskGetTickCount() is a step in the safeguard task (safeguard_runtime_task). Evidence: safeguard_runtime_esp32.c:21",
+        "lld_t0_f4": "runtime_callback() is a step in the safeguard task (safeguard_runtime_task). Evidence: safeguard_runtime_esp32.c:25",
+        "lld_t0_f3": "Loop forever is a step in the safeguard task (safeguard_runtime_task). Evidence: safeguard_runtime_esp32.c:23"
+      }
+    },
+    "sequence": {
+      "title": "Sequence Diagram",
+      "mermaid": "sequenceDiagram\n    autonumber\n    participant safeguard as Task safeguard\n    participant boot as Boot / app_main\n    boot->>safeguard: creates\n    loop task cycle\n        safeguard->>boot: xTaskGetTickCount()\n        safeguard->>boot: Loop forever\n        safeguard->>boot: runtime_callback()\n        safeguard->>boot: vTaskDelayUntil(&wake_tick)\n    end",
+      "participants": [
+        "safeguard",
+        "boot"
+      ],
+      "generated_from": [
+        "main/entry.c",
+        "firmware/configs/app_config.h",
+        "firmware/platforms/esp32/safeguard_runtime_esp32.c"
+      ],
+      "generation_error": "Showing the analysed-file fallback — the model pass failed: reply carried neither ===HLD===/===LLD===/===SEQ=== markers nor valid JSON (0 chars): no JSON object in agent output",
+      "grounding": 1.0,
+      "authored_by_model": false
+    },
+    "model_pass_expected": true
+  },
+  "change_log": [],
+  "unresolved": [
+    {
+      "kind": "gpio_task_edges",
+      "file": "firmware/platforms/esp32/safeguard_io_esp32.c",
+      "line": 20,
+      "hint": "Button and LED GPIOs are configured here, but the provided evidence does not show call sites connecting their use to the task or boot node."
+    }
+  ],
+  "read_only": false,
+  "graph_version": 3,
+  "generation": {
+    "mode": "hybrid_refine",
+    "model": "local_openai_proxy/gpt-6-luna",
+    "triggered_by": "mount",
+    "analyzed_at_ms": 1792166479237,
+    "input_files": [
+      "CMakeLists.txt",
+      "firmware/app/app.c",
+      "firmware/app/app.h",
+      "firmware/bsp/board.c",
+      "firmware/bsp/board.h",
+      "firmware/configs/app_config.h",
+      "firmware/configs/build_config.h",
+      "firmware/configs/feature_config.h",
+      "firmware/configs/platform_config.h",
+      "firmware/interfaces/safeguard_io_if.h",
+      "firmware/interfaces/safeguard_runtime_if.h",
+      "firmware/modules/safeguard_logic.c",
+      "firmware/modules/safeguard_logic.h",
+      "firmware/osal/osal.h",
+      "firmware/platforms/esp32/safeguard_io_esp32.c",
+      "firmware/platforms/esp32/safeguard_runtime_esp32.c",
+      "firmware/platforms/esp32/safeguard_runtime_esp32.h",
+      "firmware/services/safeguard_service.c",
+      "firmware/services/safeguard_service.h",
+      "firmware/utils/helpers/helpers.c",
+      "firmware/utils/helpers/helpers.h",
+      "firmware/utils/logger/logger.c",
+      "firmware/utils/logger/logger.h",
+      "main/entry.c",
+      "sdkconfig",
+      "sdkconfig.defaults"
+    ],
+    "token_usage": {
+      "prompt_tokens": 5709,
+      "completion_tokens": 1144
+    }
+  },
+  "sync_metadata": {
+    "project_file": "",
+    "content_hash": "",
+    "pending_patches": []
+  },
+  "validation_state": {
+    "valid": true,
+    "error_count": 0,
+    "warning_count": 0,
+    "validated_at_ms": 1792166479237
+  }
+}

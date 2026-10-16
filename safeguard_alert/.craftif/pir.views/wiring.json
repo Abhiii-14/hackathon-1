@@ -1,0 +1,279 @@
+{
+  "schema_version": "3.0.0",
+  "view": "wiring",
+  "revision": "0c791a7023cbf22f3bd2ccf6129ad591",
+  "graph_version": 3,
+  "generated_at_ms": 1792166526321,
+  "graph": {
+    "schema_version": 1,
+    "id": "pir_safeguard_alert",
+    "name": "safeguard_alert topology",
+    "description": "GPIO configuration gaps map to existing button and LED nodes; no additional nodes are needed.",
+    "board_id": "ESP32-DevKitC",
+    "nodes": [
+      {
+        "id": "boot",
+        "node_type": "system_init",
+        "label": "Boot / app_main",
+        "description": "Bootstraps firmware startup and initializes core subsystems.",
+        "ports": [
+          {
+            "id": "boot_boot_out_0",
+            "name": "boot_out",
+            "direction": "output",
+            "datatype": "execution",
+            "required": true,
+            "multiplicity": "one"
+          }
+        ],
+        "properties": {
+          "target": "esp32"
+        },
+        "execution": {},
+        "visual": {
+          "x": 0.0,
+          "y": 282.0,
+          "layer": 0
+        }
+      },
+      {
+        "id": "emergency_button_gpio",
+        "node_type": "gpio_input",
+        "label": "EMERGENCY BUTTON GPIO (GPIO 18, APP_EMERGENCY_BUTTON_GPIO)",
+        "description": "Reads GPIO 18 as an input signal.",
+        "ports": [
+          {
+            "id": "emergency_button_gpio_exec_in_0",
+            "name": "exec_in",
+            "direction": "input",
+            "datatype": "execution",
+            "required": false,
+            "multiplicity": "one"
+          },
+          {
+            "id": "emergency_button_gpio_gpio_out_1",
+            "name": "gpio_out",
+            "direction": "output",
+            "datatype": "gpio_level",
+            "required": true,
+            "multiplicity": "one"
+          }
+        ],
+        "properties": {
+          "pin": 18
+        },
+        "hardware": {
+          "gpio": 18,
+          "bus": "gpio",
+          "pin_label": "EMERGENCY BUTTON GPIO (GPIO 18, APP_EMERGENCY_BUTTON_GPIO)"
+        },
+        "execution": {},
+        "visual": {
+          "x": 280.0,
+          "y": 0.0,
+          "layer": 2
+        }
+      },
+      {
+        "id": "reset_button_gpio",
+        "node_type": "gpio_input",
+        "label": "RESET BUTTON GPIO (GPIO 19, APP_RESET_BUTTON_GPIO)",
+        "description": "Reads GPIO 19 as an input signal.",
+        "ports": [
+          {
+            "id": "reset_button_gpio_exec_in_0",
+            "name": "exec_in",
+            "direction": "input",
+            "datatype": "execution",
+            "required": false,
+            "multiplicity": "one"
+          },
+          {
+            "id": "reset_button_gpio_gpio_out_1",
+            "name": "gpio_out",
+            "direction": "output",
+            "datatype": "gpio_level",
+            "required": true,
+            "multiplicity": "one"
+          }
+        ],
+        "properties": {
+          "pin": 19
+        },
+        "hardware": {
+          "gpio": 19,
+          "bus": "gpio",
+          "pin_label": "RESET BUTTON GPIO (GPIO 19, APP_RESET_BUTTON_GPIO)"
+        },
+        "execution": {},
+        "visual": {
+          "x": 280.0,
+          "y": 376.0,
+          "layer": 2
+        }
+      },
+      {
+        "id": "safe_led_gpio",
+        "node_type": "gpio_output",
+        "label": "SAFE LED GPIO (GPIO 25, APP_SAFE_LED_GPIO)",
+        "description": "Drives GPIO 25 as an output signal.",
+        "ports": [
+          {
+            "id": "safe_led_gpio_exec_in_0",
+            "name": "exec_in",
+            "direction": "input",
+            "datatype": "execution",
+            "required": true,
+            "multiplicity": "one"
+          },
+          {
+            "id": "safe_led_gpio_gpio_in_1",
+            "name": "gpio_in",
+            "direction": "input",
+            "datatype": "gpio_level",
+            "required": false,
+            "multiplicity": "one"
+          }
+        ],
+        "properties": {
+          "pin": 25
+        },
+        "hardware": {
+          "gpio": 25,
+          "bus": "gpio",
+          "pin_label": "SAFE LED GPIO (GPIO 25, APP_SAFE_LED_GPIO)"
+        },
+        "execution": {},
+        "visual": {
+          "x": 280.0,
+          "y": 564.0,
+          "layer": 2
+        }
+      },
+      {
+        "id": "emergency_led_gpio",
+        "node_type": "gpio_output",
+        "label": "EMERGENCY LED GPIO (GPIO 26, APP_EMERGENCY_LED_GPIO)",
+        "description": "Drives GPIO 26 as an output signal.",
+        "ports": [
+          {
+            "id": "emergency_led_gpio_exec_in_0",
+            "name": "exec_in",
+            "direction": "input",
+            "datatype": "execution",
+            "required": true,
+            "multiplicity": "one"
+          },
+          {
+            "id": "emergency_led_gpio_gpio_in_1",
+            "name": "gpio_in",
+            "direction": "input",
+            "datatype": "gpio_level",
+            "required": false,
+            "multiplicity": "one"
+          }
+        ],
+        "properties": {
+          "pin": 26
+        },
+        "hardware": {
+          "gpio": 26,
+          "bus": "gpio",
+          "pin_label": "EMERGENCY LED GPIO (GPIO 26, APP_EMERGENCY_LED_GPIO)"
+        },
+        "execution": {},
+        "visual": {
+          "x": 280.0,
+          "y": 188.0,
+          "layer": 2
+        }
+      },
+      {
+        "id": "safeguard",
+        "node_type": "rtos_task",
+        "label": "Task safeguard",
+        "description": "Executes RTOS loop logic for safeguard.",
+        "ports": [
+          {
+            "id": "safeguard_exec_in_0",
+            "name": "exec_in",
+            "direction": "input",
+            "datatype": "execution",
+            "required": false,
+            "multiplicity": "one"
+          },
+          {
+            "id": "safeguard_trigger_in_1",
+            "name": "trigger_in",
+            "direction": "input",
+            "datatype": "event",
+            "required": false,
+            "multiplicity": "one"
+          },
+          {
+            "id": "safeguard_exec_out_2",
+            "name": "exec_out",
+            "direction": "output",
+            "datatype": "execution",
+            "required": false,
+            "multiplicity": "one"
+          },
+          {
+            "id": "safeguard_data_out_3",
+            "name": "data_out",
+            "direction": "output",
+            "datatype": "signal",
+            "required": false,
+            "multiplicity": "one"
+          }
+        ],
+        "properties": {
+          "task_name": "safeguard",
+          "priority": 5,
+          "stack_size": 4096,
+          "period_ms": 0.0
+        },
+        "execution": {
+          "priority": 5,
+          "stack_size": 4096,
+          "period_ms": 0.0
+        },
+        "visual": {
+          "x": 140.0,
+          "y": 274.0,
+          "layer": 1
+        }
+      }
+    ],
+    "connections": [
+      [
+        "boot_boot_out_0",
+        "safeguard_exec_in_0"
+      ],
+      [
+        "safeguard_data_out_3",
+        "emergency_button_gpio_exec_in_0"
+      ],
+      [
+        "safeguard_data_out_3",
+        "reset_button_gpio_exec_in_0"
+      ],
+      [
+        "safeguard_data_out_3",
+        "safe_led_gpio_gpio_in_1"
+      ],
+      [
+        "safeguard_data_out_3",
+        "emergency_led_gpio_gpio_in_1"
+      ]
+    ],
+    "layout": {
+      "orientation": "",
+      "node_width": 0.0,
+      "layer_gap": 0.0,
+      "node_gap": 0.0
+    }
+  },
+  "title": "Wiring Topology",
+  "authored_by_model": false
+}
