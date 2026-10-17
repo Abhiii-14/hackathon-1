@@ -1,0 +1,1229 @@
+
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#000000">
+  <title>SafeGuard | Emergency Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: "Inter", sans-serif;
+      --page: #000000;
+      --surface: #000000;
+      --surface-alt: #050505;
+      --text: #ffffff;
+      --muted: #a1a1aa;
+      --border: #242424;
+      --hover: #111111;
+      --input-bg: #050505;
+      --input-text: #ffffff;
+      --accent: #8ba7ff;
+      --active-bg: #2b080d;
+      --active-text: #ff8292;
+      --resolved-bg: #06271b;
+      --resolved-text: #65e6ad;
+      --error-bg: #28090d;
+      --error-text: #ff9da7;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: #000000 !important;
+      color: #ffffff;
+    }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1500px, 100%);
+      margin: auto;
+      padding: 30px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 35px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .brand-icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 13px;
+      background: #ffffff;
+      color: #000000;
+      font-size: 25px;
+      font-weight: 800;
+    }
+
+    h1,
+    h2,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 22px;
+      letter-spacing: -.7px;
+    }
+
+    .subtitle {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .connection {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      margin-right: 5px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #e5a23d;
+    }
+
+    .dot.online {
+      background: #32d399;
+    }
+
+    .dot.offline {
+      background: #ff5268;
+    }
+
+    .button {
+      border: 1px solid #303030;
+      border-radius: 9px;
+      background: #000000;
+      color: #ffffff;
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      transition: background .15s, border-color .15s;
+    }
+
+    .button:hover {
+      background: #151515;
+      border-color: #555555;
+    }
+
+    .button.primary {
+      background: #ffffff;
+      border-color: #ffffff;
+      color: #000000;
+    }
+
+    .button.primary:hover {
+      background: #dcdcdc;
+    }
+
+    .button:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
+    .page-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 23px;
+    }
+
+    .page-heading h2 {
+      font-size: 26px;
+      letter-spacing: -.8px;
+    }
+
+    .page-heading p {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .metric {
+      min-width: 0;
+      padding: 21px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: #000000;
+    }
+
+    .metric-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .metric-icon {
+      font-size: 20px;
+    }
+
+    .metric-value {
+      margin-top: 20px;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -1px;
+    }
+
+    .metric-note {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .panel {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: #000000;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding: 21px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-header h2 {
+      font-size: 15px;
+    }
+
+    .panel-header p {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: minmax(180px, 1.6fr) minmax(130px, .7fr) minmax(130px, .7fr) auto;
+      gap: 10px;
+      padding: 17px 21px;
+      border-bottom: 1px solid var(--border);
+      background: #000000;
+    }
+
+    .field {
+      width: 100%;
+      min-width: 0;
+      padding: 11px 12px;
+      outline: none;
+      border: 1px solid #303030;
+      border-radius: 8px;
+      background: #050505;
+      color: #ffffff;
+      font-size: 12px;
+    }
+
+    .field:focus {
+      border-color: #888888;
+    }
+
+    .field::placeholder {
+      color: #777777;
+    }
+
+    select option {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      background: #000000;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      white-space: nowrap;
+      font-size: 12px;
+    }
+
+    thead {
+      background: #050505;
+    }
+
+    th {
+      padding: 15px 17px;
+      text-align: left;
+      color: #a1a1aa;
+      border-bottom: 1px solid #242424;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+    }
+
+    th button {
+      border: 0;
+      padding: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      text-transform: inherit;
+      letter-spacing: inherit;
+    }
+
+    td {
+      padding: 16px 17px;
+      border-bottom: 1px solid #191919;
+      color: #ffffff;
+      vertical-align: middle;
+      max-width: 280px;
+    }
+
+    tbody tr {
+      background: #000000;
+    }
+
+    tbody tr:hover {
+      background: #101010;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .event-id {
+      display: inline-block;
+      max-width: 145px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #a1a1aa;
+      font-family: monospace;
+      font-size: 11px;
+      vertical-align: middle;
+    }
+
+    .source {
+      display: inline-flex;
+      padding: 6px 9px;
+      border: 1px solid #303030;
+      border-radius: 6px;
+      background: #080808;
+      color: #eeeeee;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 9px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+
+    .status::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .status.active {
+      background: var(--active-bg);
+      color: var(--active-text);
+    }
+
+    .status.resolved {
+      background: var(--resolved-bg);
+      color: var(--resolved-text);
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .map-link {
+      color: #a8bcff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .map-link:hover {
+      text-decoration: underline;
+    }
+
+    .empty {
+      padding: 55px 20px;
+      background: #000000;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .empty-icon {
+      margin-bottom: 12px;
+      font-size: 30px;
+    }
+
+    .empty strong {
+      display: block;
+      margin-bottom: 7px;
+      color: #ffffff;
+      font-size: 14px;
+    }
+
+    .empty p {
+      font-size: 12px;
+    }
+
+    .table-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding: 16px 21px;
+      border-top: 1px solid var(--border);
+      background: #000000;
+    }
+
+    .footer-info {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .page-number {
+      min-width: 80px;
+      color: #ffffff;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .message {
+      margin-bottom: 18px;
+      padding: 13px 15px;
+      border: 1px solid #303030;
+      border-radius: 8px;
+      background: #050505;
+      color: #ffffff;
+      font-size: 12px;
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+    }
+
+    .message.error {
+      border-color: #63202a;
+      background: #180609;
+      color: #ff9da7;
+    }
+
+    .message.success {
+      color: #65e6ad;
+    }
+
+    .columns-menu {
+      position: relative;
+    }
+
+    .columns-options {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 10;
+      width: 205px;
+      padding: 12px;
+      border: 1px solid #303030;
+      border-radius: 10px;
+      background: #000000;
+    }
+
+    .columns-options label {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 4px;
+      color: #ffffff;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .columns-options input {
+      accent-color: #ffffff;
+    }
+
+    .footer-note {
+      margin-top: 22px;
+      color: #777777;
+      font-size: 10px;
+      line-height: 1.8;
+      text-align: center;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 900px) {
+      .app {
+        padding: 20px;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .search-field {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .app {
+        padding: 13px;
+      }
+
+      .topbar {
+        margin-bottom: 26px;
+      }
+
+      .brand-icon {
+        width: 42px;
+        height: 42px;
+      }
+
+      h1 {
+        font-size: 19px;
+      }
+
+      .page-heading h2 {
+        font-size: 23px;
+      }
+
+      .metrics {
+        gap: 9px;
+      }
+
+      .metric {
+        padding: 14px;
+      }
+
+      .metric-value {
+        font-size: 26px;
+      }
+
+      .filters {
+        grid-template-columns: 1fr;
+        padding: 14px;
+      }
+
+      .search-field {
+        grid-column: auto;
+      }
+
+      .panel-header,
+      .table-footer {
+        padding: 15px;
+      }
+
+      .page-number {
+        min-width: 58px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon">S</div>
+        <div>
+          <h1>SafeGuard</h1>
+          <p class="subtitle">Emergency monitoring system</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <div class="connection">
+          <span id="connectionDot" class="dot"></span>
+          <span id="connectionText">Connecting...</span>
+        </div>
+        <button class="button primary" id="refreshButton" type="button">↻ Refresh</button>
+      </div>
+    </header>
+
+    <section class="page-heading">
+      <div>
+        <h2>Emergency Events</h2>
+        <p>Monitor and review emergency records from your database.</p>
+      </div>
+      <p id="lastUpdated">Last updated: Not yet</p>
+    </section>
+
+    <section class="metrics">
+      <article class="metric">
+        <div class="metric-top">
+          <span class="metric-label">Total Events</span>
+          <span class="metric-icon">▤</span>
+        </div>
+        <div class="metric-value" id="totalCount">0</div>
+        <p class="metric-note">All fetched records</p>
+      </article>
+
+      <article class="metric">
+        <div class="metric-top">
+          <span class="metric-label">Active Events</span>
+          <span class="metric-icon">🚨</span>
+        </div>
+        <div class="metric-value" id="activeCount">0</div>
+        <p class="metric-note">Awaiting resolution</p>
+      </article>
+
+      <article class="metric">
+        <div class="metric-top">
+          <span class="metric-label">Resolved Events</span>
+          <span class="metric-icon">✓</span>
+        </div>
+        <div class="metric-value" id="resolvedCount">0</div>
+        <p class="metric-note">Marked as resolved</p>
+      </article>
+
+      <article class="metric">
+        <div class="metric-top">
+          <span class="metric-label">Camera Events</span>
+          <span class="metric-icon">◉</span>
+        </div>
+        <div class="metric-value" id="cameraCount">0</div>
+        <p class="metric-note">Detected by camera</p>
+      </article>
+    </section>
+
+    <div id="message" class="message hidden" role="status"></div>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Event Records</h2>
+          <p id="recordSummary">Loading records...</p>
+        </div>
+
+        <div class="columns-menu">
+          <button class="button" id="columnsButton" type="button" aria-expanded="false">
+            ☷ Columns
+          </button>
+
+          <div class="columns-options hidden" id="columnsOptions">
+            <label><input type="checkbox" data-column="id" checked> Event ID</label>
+            <label><input type="checkbox" data-column="user_id" checked> User ID</label>
+            <label><input type="checkbox" data-column="source" checked> Source</label>
+            <label><input type="checkbox" data-column="status" checked> Status</label>
+            <label><input type="checkbox" data-column="triggered_at" checked> Triggered at</label>
+            <label><input type="checkbox" data-column="resolved_at" checked> Resolved at</label>
+            <label><input type="checkbox" data-column="location" checked> Location</label>
+            <label><input type="checkbox" data-column="accuracy_m"> Accuracy</label>
+            <label><input type="checkbox" data-column="location_status"> Location status</label>
+            <label><input type="checkbox" data-column="location_error"> Location error</label>
+            <label><input type="checkbox" data-column="updated_at"> Updated at</label>
+          </div>
+        </div>
+      </div>
+
+      <div class="filters">
+        <input
+          id="searchInput"
+          class="field search-field"
+          type="search"
+          placeholder="Search event ID, user ID, source..."
+          aria-label="Search events"
+        >
+
+        <select id="sourceFilter" class="field" aria-label="Filter by source">
+          <option value="">All sources</option>
+          <option value="manual">Manual</option>
+          <option value="camera">Camera</option>
+          <option value="esp32">ESP32</option>
+        </select>
+
+        <select id="statusFilter" class="field" aria-label="Filter by status">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="resolved">Resolved</option>
+        </select>
+
+        <button class="button" id="clearFiltersButton" type="button">Clear filters</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-col="id"><button data-sort="id">Event ID ↕</button></th>
+              <th data-col="user_id"><button data-sort="user_id">User ID ↕</button></th>
+              <th data-col="source"><button data-sort="source">Source ↕</button></th>
+              <th data-col="status"><button data-sort="status">Status ↕</button></th>
+              <th data-col="triggered_at"><button data-sort="triggered_at">Triggered at ↕</button></th>
+              <th data-col="resolved_at"><button data-sort="resolved_at">Resolved at ↕</button></th>
+              <th data-col="location">Location</th>
+              <th data-col="accuracy_m"><button data-sort="accuracy_m">Accuracy ↕</button></th>
+              <th data-col="location_status"><button data-sort="location_status">Location status ↕</button></th>
+              <th data-col="location_error">Location error</th>
+              <th data-col="updated_at"><button data-sort="updated_at">Updated at ↕</button></th>
+            </tr>
+          </thead>
+          <tbody id="eventsBody"></tbody>
+        </table>
+
+        <div id="emptyState" class="empty hidden">
+          <div class="empty-icon">⌕</div>
+          <strong>No events found</strong>
+          <p>Change your search or filters, or check your database records.</p>
+        </div>
+      </div>
+
+      <div class="table-footer">
+        <span class="footer-info" id="paginationInfo">Showing 0 records</span>
+        <div class="pagination">
+          <button class="button" id="prevButton" type="button">← Previous</button>
+          <span class="page-number" id="pageInfo">Page 1 of 1</span>
+          <button class="button" id="nextButton" type="button">Next →</button>
+        </div>
+      </div>
+    </section>
+
+    <p class="footer-note">
+      SafeGuard Emergency Monitoring · All timestamps are displayed in IST.<br>
+      For monitoring purposes only. This dashboard does not replace emergency response services.
+    </p>
+
+  </main>
+
+  <script>
+    // Replace these with your Supabase project details.
+    // Use a publishable key or legacy anon key, never the service_role key.
+    const SUPABASE_URL = "https://xrvnwzpttejnivxqigmz.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_BT69n1h0rfetfqAJ0Zii-w_taJnYfuc";
+
+    const TABLE_NAME = "emergency_events";
+    const PAGE_SIZE = 10;
+    const REFRESH_INTERVAL = 30000;
+
+    const state = {
+      client: null,
+      events: [],
+      filteredEvents: [],
+      page: 1,
+      sortKey: "triggered_at",
+      sortDirection: "desc",
+      loading: false
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function showMessage(text, type = "") {
+      const box = $("message");
+      box.textContent = text;
+      box.className = "message" + (type ? " " + type : "");
+      box.classList.remove("hidden");
+    }
+
+    function hideMessage() {
+      $("message").classList.add("hidden");
+    }
+
+    function setConnection(status, text) {
+      $("connectionDot").className = "dot " + status;
+      $("connectionText").textContent = text;
+    }
+
+    function formatDate(value) {
+      if (!value) return "—";
+
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return escapeHTML(value);
+
+      return new Intl.DateTimeFormat("en-IN", {
+        timeZone: "Asia/Kolkata",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true
+      }).format(date);
+    }
+
+function formatLocation(event) {
+  const rawLat = event.latitude;
+  const rawLng = event.longitude;
+
+  // Check for missing coordinates
+  if (
+    rawLat == null ||
+    rawLng == null ||
+    String(rawLat).trim() === "" ||
+    String(rawLng).trim() === ""
+  ) {
+    return '<span class="muted">Location unavailable</span>';
+  }
+
+  const lat = Number(rawLat);
+  const lng = Number(rawLng);
+
+  // Validate coordinates
+  if (
+    !Number.isFinite(lat) ||
+    !Number.isFinite(lng) ||
+    lat < -90 || lat > 90 ||
+    lng < -180 || lng > 180
+  ) {
+    return '<span class="muted">Invalid coordinates</span>';
+  }
+
+  // Google's official Maps URLs format
+  const destination = encodeURIComponent(`${lat},${lng}`);
+  const url =
+    `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`;
+
+  return `
+    <a
+      class="map-link"
+      href="${url}"
+      target="_blank"
+      rel="noopener noreferrer"
+      style="display:inline-block;cursor:pointer"
+    > ${lat.toFixed(5)}, ${lng.toFixed(5)} ↗</a>
+  `;
+}
+
+    function renderStatus(status) {
+      const value = String(status || "unknown").toLowerCase();
+      const css = ["active", "resolved"].includes(value) ? value : "";
+      return `<span class="status ${css}">${escapeHTML(value)}</span>`;
+    }
+
+    function renderCell(event, key) {
+      switch (key) {
+        case "id":
+        case "user_id":
+          return `<span class="event-id" title="${escapeHTML(event[key])}">${escapeHTML(event[key] || "—")}</span>`;
+
+        case "source":
+          return `<span class="source">${escapeHTML(event.source || "unknown")}</span>`;
+
+        case "status":
+          return renderStatus(event.status);
+
+        case "triggered_at":
+        case "resolved_at":
+        case "updated_at":
+          return formatDate(event[key]);
+
+        case "location":
+          return formatLocation(event);
+
+        case "accuracy_m":
+          return event.accuracy_m == null
+            ? "—"
+            : `${escapeHTML(event.accuracy_m)} m`;
+
+        case "location_status":
+          return escapeHTML(event.location_status || "—");
+
+        case "location_error":
+          return event.location_error
+            ? `<span title="${escapeHTML(event.location_error)}">${escapeHTML(event.location_error)}</span>`
+            : "—";
+
+        default:
+          return escapeHTML(event[key] ?? "—");
+      }
+    }
+
+    function getVisibleColumns() {
+      return Array.from(document.querySelectorAll("[data-column]"))
+        .filter((input) => input.checked)
+        .map((input) => input.dataset.column);
+    }
+
+    function applyColumnVisibility() {
+      const visible = new Set(getVisibleColumns());
+
+      document.querySelectorAll("[data-col]").forEach((element) => {
+        element.classList.toggle("hidden", !visible.has(element.dataset.col));
+      });
+    }
+
+    function updateMetrics() {
+      const events = state.events;
+
+      $("totalCount").textContent = events.length.toLocaleString("en-IN");
+      $("activeCount").textContent = events.filter(
+        (event) => event.status === "active"
+      ).length.toLocaleString("en-IN");
+
+      $("resolvedCount").textContent = events.filter(
+        (event) => event.status === "resolved"
+      ).length.toLocaleString("en-IN");
+
+      $("cameraCount").textContent = events.filter(
+        (event) => event.source === "camera"
+      ).length.toLocaleString("en-IN");
+    }
+
+    function applyFilters() {
+      const query = $("searchInput").value.trim().toLowerCase();
+      const source = $("sourceFilter").value;
+      const status = $("statusFilter").value;
+
+      state.filteredEvents = state.events.filter((event) => {
+        const matchesQuery = !query || [
+          event.id,
+          event.user_id,
+          event.source,
+          event.status,
+          event.location_status,
+          event.location_error,
+          event.latitude,
+          event.longitude
+        ].some((value) => String(value ?? "").toLowerCase().includes(query));
+
+        return matchesQuery &&
+          (!source || event.source === source) &&
+          (!status || event.status === status);
+      });
+
+      state.filteredEvents.sort((a, b) => {
+        let av = a[state.sortKey];
+        let bv = b[state.sortKey];
+
+        if (av == null) av = "";
+        if (bv == null) bv = "";
+
+        if (["triggered_at", "resolved_at", "updated_at"].includes(state.sortKey)) {
+          av = av ? new Date(av).getTime() : 0;
+          bv = bv ? new Date(bv).getTime() : 0;
+        } else if (state.sortKey === "accuracy_m") {
+          av = Number(av) || 0;
+          bv = Number(bv) || 0;
+        } else {
+          av = String(av).toLowerCase();
+          bv = String(bv).toLowerCase();
+        }
+
+        const result = av < bv ? -1 : av > bv ? 1 : 0;
+        return state.sortDirection === "asc" ? result : -result;
+      });
+
+      const pages = Math.max(1, Math.ceil(state.filteredEvents.length / PAGE_SIZE));
+      state.page = Math.min(state.page, pages);
+      renderTable();
+    }
+
+    function renderTable() {
+      const records = state.filteredEvents;
+      const total = records.length;
+      const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+      const start = (state.page - 1) * PAGE_SIZE;
+      const pageRecords = records.slice(start, start + PAGE_SIZE);
+      const visibleColumns = getVisibleColumns();
+
+      if (pageRecords.length === 0) {
+        $("eventsBody").innerHTML = "";
+        $("emptyState").classList.remove("hidden");
+      } else {
+        $("emptyState").classList.add("hidden");
+
+        $("eventsBody").innerHTML = pageRecords.map((event) => `
+          <tr>
+            ${visibleColumns.map((key) =>
+              `<td data-col="${key}">${renderCell(event, key)}</td>`
+            ).join("")}
+          </tr>
+        `).join("");
+      }
+
+      applyColumnVisibility();
+
+      $("recordSummary").textContent =
+        `${total.toLocaleString("en-IN")} matching record${total === 1 ? "" : "s"}`;
+
+      $("paginationInfo").textContent = total === 0
+        ? "Showing 0 records"
+        : `Showing ${start + 1}–${Math.min(start + PAGE_SIZE, total)} of ${total}`;
+
+      $("pageInfo").textContent = `Page ${state.page} of ${pages}`;
+      $("prevButton").disabled = state.page <= 1;
+      $("nextButton").disabled = state.page >= pages;
+    }
+
+    async function fetchEvents() {
+      if (state.loading) return;
+
+      if (
+        SUPABASE_URL === "YOUR_SUPABASE_PROJECT_URL" ||
+        SUPABASE_KEY === "YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY"
+      ) {
+        setConnection("offline", "Configuration required");
+        showMessage(
+          "Add your Supabase project URL and publishable/anon key in the JavaScript configuration section.",
+          "error"
+        );
+        return;
+      }
+
+      if (!window.supabase?.createClient) {
+        setConnection("offline", "SDK unavailable");
+        showMessage("The Supabase SDK could not load. Check your internet connection and reload the page.", "error");
+        return;
+      }
+
+      if (!state.client) {
+        try {
+          state.client = window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+          );
+        } catch (error) {
+          setConnection("offline", "Configuration error");
+          showMessage("Supabase initialization failed: " + error.message, "error");
+          return;
+        }
+      }
+
+      state.loading = true;
+      $("refreshButton").disabled = true;
+      $("refreshButton").textContent = "↻ Loading...";
+
+      try {
+        const { data, error } = await state.client
+          .from(TABLE_NAME)
+          .select(
+            "id,user_id,source,status,triggered_at,resolved_at,latitude,longitude,accuracy_m,location_status,location_error,updated_at"
+          )
+          .order("triggered_at", { ascending: false })
+          .limit(1000);
+
+        if (error) throw error;
+
+        state.events = data || [];
+
+        updateMetrics();
+        applyFilters();
+
+        setConnection("online", "Connected to Supabase");
+
+        $("lastUpdated").textContent = "Last updated: " +
+          new Intl.DateTimeFormat("en-IN", {
+            timeZone: "Asia/Kolkata",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true
+          }).format(new Date());
+
+        hideMessage();
+      } catch (error) {
+        setConnection("offline", "Database error");
+
+        const code = error.code ? ` (${error.code})` : "";
+        showMessage(
+          "Could not load events" + code + ": " +
+          (error.message || "Unknown error") +
+          ". Check your Supabase URL, key, table name, SELECT permissions, and RLS policies.",
+          "error"
+        );
+      } finally {
+        state.loading = false;
+        $("refreshButton").disabled = false;
+        $("refreshButton").textContent = "↻ Refresh";
+      }
+    }
+
+    $("refreshButton").addEventListener("click", fetchEvents);
+
+    $("searchInput").addEventListener("input", () => {
+      state.page = 1;
+      applyFilters();
+    });
+
+    $("sourceFilter").addEventListener("change", () => {
+      state.page = 1;
+      applyFilters();
+    });
+
+    $("statusFilter").addEventListener("change", () => {
+      state.page = 1;
+      applyFilters();
+    });
+
+    $("clearFiltersButton").addEventListener("click", () => {
+      $("searchInput").value = "";
+      $("sourceFilter").value = "";
+      $("statusFilter").value = "";
+      state.page = 1;
+      applyFilters();
+    });
+
+    $("prevButton").addEventListener("click", () => {
+      if (state.page > 1) {
+        state.page--;
+        renderTable();
+      }
+    });
+
+    $("nextButton").addEventListener("click", () => {
+      const pages = Math.max(
+        1,
+        Math.ceil(state.filteredEvents.length / PAGE_SIZE)
+      );
+
+      if (state.page < pages) {
+        state.page++;
+        renderTable();
+      }
+    });
+
+    document.querySelectorAll("[data-sort]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const key = button.dataset.sort;
+
+        if (state.sortKey === key) {
+          state.sortDirection =
+            state.sortDirection === "asc" ? "desc" : "asc";
+        } else {
+          state.sortKey = key;
+          state.sortDirection = "asc";
+        }
+
+        state.page = 1;
+        applyFilters();
+      });
+    });
+
+    $("columnsButton").addEventListener("click", () => {
+      const menu = $("columnsOptions");
+      menu.classList.toggle("hidden");
+      $("columnsButton").setAttribute(
+        "aria-expanded",
+        String(!menu.classList.contains("hidden"))
+      );
+    });
+
+    document.querySelectorAll("[data-column]").forEach((input) => {
+      input.addEventListener("change", () => {
+        if (getVisibleColumns().length === 0) {
+          input.checked = true;
+        }
+
+        renderTable();
+      });
+    });
+
+    document.addEventListener("click", (event) => {
+      const menu = $("columnsOptions");
+      const button = $("columnsButton");
+
+      if (!menu.contains(event.target) && !button.contains(event.target)) {
+        menu.classList.add("hidden");
+        button.setAttribute("aria-expanded", "false");
+      }
+    });
+
+    fetchEvents();
+    setInterval(fetchEvents, REFRESH_INTERVAL);
+  </script>
+</body>
+</html>
