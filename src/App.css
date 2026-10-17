@@ -746,6 +746,12 @@ h3 {
    ESP32 HERO IMAGE
    ========================================== */
 
+.hero.unknown {
+  background: linear-gradient(115deg, #273449, #182536 80%);
+  border: 1px solid #64748b;
+  box-shadow: 0 12px 35px #64748b18;
+}
+
 .hero-icon {
   width: 104px;
   height: 104px;
@@ -879,6 +885,13 @@ h3 {
 /* ==========================================
    STATISTICS GRID
    ========================================== */
+
+.unknown .pulse-dot {
+  background: #94a3b8;
+  box-shadow: 0 0 12px #94a3b880;
+}
+
+/* Statistics cards */
 
 .stats {
   display: grid;
@@ -1183,6 +1196,26 @@ h3 {
    EVENT HISTORY
    ========================================== */
 
+.command-status {
+  overflow-wrap: anywhere;
+}
+
+.command-status.pending {
+  border-color: #8a6d2d;
+  color: #fcd67a;
+}
+
+.command-status.acknowledged {
+  border-color: #247b67;
+  color: #86efac;
+}
+
+.command-status.failed {
+  border-color: #8f4051;
+  color: #fda4af;
+}
+
+/* Event history */
 .history {
   margin-top: 24px;
 }

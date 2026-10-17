@@ -8,6 +8,8 @@ YOLO `.pt` model or an OpenCV DNN YOLOv8/YOLO11 ONNX model.
 
 - `GET /` describes the service and links the supported routes.
 - `GET /api/health` confirms the API connection separately from model readiness.
+- `GET /api/esp32/status` reports ESP32 serial connection and emergency state.
+- `POST /api/esp32/command` requests an ESP32 state change and waits for its serial acknowledgement.
 - `POST /api/detect` accepts a multipart image field named `frame`.
 - `GET /docs` opens FastAPI's interactive API documentation.
 
@@ -60,7 +62,7 @@ Install the optional Ultralytics dependency set in the backend virtual
 environment:
 
 ```powershell
-.\backend\.venv\Scripts\python.exe -m pip install -r backend\requirements-yolo.txt
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements-yolo.txt
 ```
 
 Place the validated fire-trained checkpoint at `backend\models\fire.pt`, then
@@ -94,27 +96,72 @@ configuration.
 
 ## Windows PowerShell setup
 
-Python 3.14.7 is installed in the checked workspace. The OpenCV/ONNX backend
-dependencies are listed for that interpreter. The optional
-Ultralytics/PyTorch `.pt` backend may need a different Python version supported
-by the relevant PyTorch wheel.
+Use the existing project-root `.venv` for this checkout. The optional
+Ultralytics/PyTorch `.pt` backend requires versions compatible with that
+environment's Python interpreter; the OpenCV/ONNX backend dependencies are
+listed in `backend\requirements.txt`.
 
-From the project root:
+Use the existing project-root `.venv` from the project root. PySerial is
+included in `backend\requirements.txt`:
 
 ```powershell
-& "C:\Users\Abhi\AppData\Local\Python\pythoncore-3.14-64\python.exe" -m venv backend\.venv
-.\backend\.venv\Scripts\python.exe -m pip install --upgrade pip
-.\backend\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
-.\backend\.venv\Scripts\python.exe -m pip install -r backend\requirements-yolo.txt
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
 ```
 
 The `.pt` checkpoint is already present at `backend\models\fire.pt`; the `.env`
 example configures it as the default.
 
-Run the backend in one PowerShell terminal:
+Connect the ESP32 to COM3 at 115200 baud. The backend opens that port, retries
+after disconnections, and exposes its current state at
+`http://127.0.0.1:8001/api/esp32/status`. Override the serial settings with
+`ESP32_SERIAL_PORT` and `ESP32_BAUD_RATE` in `backend\.env` if necessary.
+
+### ESP32 command protocol
+
+The backend owns the single PySerial connection. Website control requests are
+written to that existing connection as UTF-8/ASCII lines terminated with `\n`:
+
+```text
+CMD,<request_id>,EMERGENCY\n
+CMD,<request_id>,RESET\n
+```
+
+`request_id` is a unique 1-64 character identifier containing only ASCII
+letters, digits, underscores, or hyphens. FirmGen must parse one complete
+newline-delimited line at a time, set the red/green LED outputs to the requested
+state, and only then reply on the same serial connection:
+
+```text
+ACK,<request_id>,EMERGENCY\n
+ACK,<request_id>,SAFE\n
+```
+
+For an unsupported command or a command the ESP32 cannot apply, reply:
+
+```text
+NACK,<request_id>,<reason>\n
+```
+
+The acknowledgement must echo the request ID exactly. `ACK,...,EMERGENCY`
+confirms the red LED is on and green LED is off; `ACK,...,SAFE` confirms the
+green LED is on and red LED is off. The backend reports success only for the
+matching ACK. It reports a timeout, NACK, mismatched ACK, or serial disconnect
+as a command failure. Keep existing button event messages
+`EMERGENCY ACTIVATED`, `SYSTEM RESET`, and `SYSTEM SAFE` newline-terminated;
+they remain device-originated state events and are not command acknowledgements.
+On startup/reconnect, the ESP32 should emit its current state using one of those
+messages. Repeated commands with the same request ID must be idempotent and may
+be acknowledged again without toggling outputs.
+
+This requires ESP32 firmware support for the protocol; no firmware is changed
+by this project. Bind the API to loopback (`127.0.0.1`) as shown in the run
+command. This serial control is an educational prototype, not a production
+safety controller and must not be relied on for life-safety decisions.
+
+Run or restart the backend in one PowerShell terminal from the project root:
 
 ```powershell
-.\backend\.venv\Scripts\python.exe -m uvicorn app:app --app-dir backend --host 127.0.0.1 --port 8000 --reload
+.\.venv\Scripts\python.exe -m uvicorn app:app --app-dir backend --host 127.0.0.1 --port 8001 --reload
 ```
 
 Run the frontend in a second terminal:
@@ -125,28 +172,34 @@ npm.cmd run dev -- --host 127.0.0.1
 
 Open the Vite URL, start the laptop camera, and allow camera access. The React
 client captures selected frames from the displayed webcam stream and posts each
-as the `frame` field to `http://127.0.0.1:8000/api/detect`; the backend does not
+as the `frame` field to `http://127.0.0.1:8001/api/detect`; the backend does not
 open another camera or request camera permission.
 
 Automatic alerts require fire predictions in at least 3 of the last 5 sampled
 frames. A 60-second cooldown suppresses repeat automatic alerts. Predictions
 are displayed with class, confidence, and model bounding boxes. The existing
 manual emergency and resolve controls continue to use the same dashboard
-state. AI events are recorded as source `camera`; this integration does not
-send SMS or issue ESP32 commands.
+state. Website emergency activation first requires an ESP32 ACK, then preserves
+the existing manual/camera Supabase record and browser-location workflow.
+Website reset first requires an ESP32 ACK, then resolves an existing active
+Supabase record. ESP32-originated emergencies update the dashboard but do not
+create Supabase records, request GPS, or send SMS; an ESP32 reset resolves an
+existing active record to prevent stale dashboard state. AI events continue to
+be recorded as source `camera`. Hardware button tests do not create new
+Supabase rows or send SMS.
 
 ## Validation
 
 Run backend checks:
 
 ```powershell
-.\backend\.venv\Scripts\python.exe -m unittest discover -s backend\tests
+.\.venv\Scripts\python.exe -m unittest discover -s backend\tests
 ```
 
 Run inference against a safe, prerecorded image or video (no real fire):
 
 ```powershell
-.\backend\.venv\Scripts\python.exe backend\test_media.py "C:\path\to\licensed-safe-fire-sample.mp4" --sample-every 10
+.\.venv\Scripts\python.exe backend\test_media.py "C:\path\to\licensed-safe-fire-sample.mp4" --sample-every 10
 ```
 
 Use only media you are allowed to use. The startup warm-up uses a blank frame

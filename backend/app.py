@@ -5,7 +5,7 @@ import os
 import threading
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import cv2
 import numpy as np
@@ -13,12 +13,19 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
+
+from esp32_serial import Esp32CommandError, Esp32SerialListener
 
 BACKEND_DIR = Path(__file__).resolve().parent
 load_dotenv(BACKEND_DIR / ".env")
 
 MAX_FRAME_BYTES = 2 * 1024 * 1024
 logger = logging.getLogger("safeguard.fire_detection")
+esp32_listener = Esp32SerialListener(
+    port=os.getenv("ESP32_SERIAL_PORT", "COM3"),
+    baudrate=int(os.getenv("ESP32_BAUD_RATE", "115200")),
+)
 net: cv2.dnn.Net | None = None
 pt_model: Any | None = None
 class_names: list[str] = []
@@ -340,8 +347,12 @@ def predict_frame(frame: np.ndarray) -> dict[str, Any]:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    load_detector()
-    yield
+    esp32_listener.start()
+    try:
+        load_detector()
+        yield
+    finally:
+        esp32_listener.stop()
 
 
 app = FastAPI(title="SafeGuard AI Fire Detection", lifespan=lifespan)
@@ -357,12 +368,19 @@ app.add_middleware(
 )
 
 
+class Esp32CommandRequest(BaseModel):
+    request_id: str = Field(pattern=r"^[A-Za-z0-9_-]{1,64}$")
+    target: Literal["emergency", "reset"]
+
+
 @app.get("/")
 def root() -> dict[str, Any]:
     return {
         "service": "SafeGuard AI Fire Detection API",
         "api_status": "connected",
         "health_endpoint": "/api/health",
+        "esp32_status_endpoint": "/api/esp32/status",
+        "esp32_command_endpoint": "POST /api/esp32/command",
         "detection_endpoint": "POST /api/detect",
         "docs_endpoint": "/docs"
     }
@@ -371,6 +389,26 @@ def root() -> dict[str, Any]:
 @app.get("/api/health")
 def health() -> dict[str, Any]:
     return model_health()
+
+
+@app.get("/api/esp32/status")
+def esp32_status() -> dict[str, Any]:
+    return esp32_listener.snapshot()
+
+
+@app.post("/api/esp32/command")
+async def send_esp32_command(command: Esp32CommandRequest) -> dict[str, Any]:
+    try:
+        return await run_in_threadpool(
+            esp32_listener.send_command,
+            command.request_id,
+            command.target,
+        )
+    except Esp32CommandError as error:
+        raise HTTPException(
+            status_code=error.status_code,
+            detail=error.result,
+        ) from error
 
 
 @app.post("/api/detect")

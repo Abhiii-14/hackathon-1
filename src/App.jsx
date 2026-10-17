@@ -20,6 +20,7 @@ import {
 } from "./lib/emergencyRepository";
 import { isSupabaseConfigured } from "./lib/supabase";
 import { formatTimestamp, resolveTimezoneForCoordinates } from "./lib/locationTime";
+import { FIRE_API_URL } from "./lib/fireApi";
 import "./App.css";
 
 const LocationMap = lazy(() => import("./LocationMap"));
@@ -28,7 +29,22 @@ const LOCATION_ACQUISITION_TIMEOUT_MS = 30000;
 
 export default function App() {
   const [emergency, setEmergency] = useState(false);
+  const [esp32Status, setEsp32Status] = useState({
+    connected: false,
+    apiConnected: false,
+    instance_id: null,
+    port: "COM3",
+    baud_rate: 115200,
+    emergency_active: false,
+    state_known: false,
+    event_id: 0
+  });
+  const [esp32CommandStatus, setEsp32CommandStatus] = useState({
+    state: "idle",
+    message: "No ESP32 command has been sent."
+  });
   const [events, setEvents] = useState([]);
+  const [esp32Events, setEsp32Events] = useState([]);
   const [emergencyTimestamp, setEmergencyTimestamp] = useState(null);
   const [locationTimezone, setLocationTimezone] = useState(null);
   const [activeEventId, setActiveEventId] = useState(null);
@@ -50,6 +66,101 @@ export default function App() {
   const locationWatchId = useRef(null);
   const locationTimeoutId = useRef(null);
   const bestLocation = useRef(null);
+  const lastEsp32EventId = useRef(null);
+  const esp32InstanceId = useRef(null);
+  const esp32StatusRef = useRef(esp32Status);
+  const activeEventIdRef = useRef(null);
+  const userIdRef = useRef(null);
+  const backendStatusRef = useRef(backendStatus);
+  const esp32ResetSyncPending = useRef(false);
+  const esp32ResetSyncPromise = useRef(null);
+  const applyDeviceSafeStateRef = useRef(() => {});
+  const resolveActiveSupabaseEmergencyRef = useRef(() => {});
+  esp32StatusRef.current = esp32Status;
+  userIdRef.current = userId;
+  backendStatusRef.current = backendStatus;
+
+  useEffect(() => {
+    let active = true;
+    let timeoutId;
+
+    async function pollEsp32Status() {
+      try {
+        const response = await fetch(`${FIRE_API_URL}/api/esp32/status`);
+        if (!response.ok) {
+          throw new Error(`Backend returned HTTP ${response.status}.`);
+        }
+        const status = await response.json();
+        if (typeof status.connected !== "boolean" ||
+            typeof status.emergency_active !== "boolean" ||
+            typeof status.state_known !== "boolean" ||
+            !Number.isSafeInteger(Number(status.event_id)) ||
+            typeof status.instance_id !== "string") {
+          throw new Error("ESP32 status endpoint returned an invalid response.");
+        }
+        if (active) {
+          const eventId = Number(status.event_id);
+          const firstBackendConnection = esp32InstanceId.current === null;
+          const newBackendInstance = esp32InstanceId.current !== status.instance_id;
+          if (newBackendInstance) {
+            esp32InstanceId.current = status.instance_id;
+            lastEsp32EventId.current = firstBackendConnection ? null : eventId;
+          }
+          if ((!newBackendInstance || firstBackendConnection) &&
+              Number.isSafeInteger(eventId) && eventId >= 0 &&
+              eventId !== lastEsp32EventId.current) {
+            const previousEventId = lastEsp32EventId.current;
+            lastEsp32EventId.current = eventId;
+            const eventType = String(status.last_event || "").toLowerCase();
+            if ((previousEventId !== null || eventId > 0) &&
+                ["emergency", "reset", "safe"].includes(eventType)) {
+              const resolved = eventType !== "emergency";
+              const timestamp = status.last_event_at || new Date().toISOString();
+              setEsp32Events(previous => [{
+                id: `esp32-${status.instance_id}-${eventId}`,
+                source: "esp32",
+                status: resolved ? "resolved" : "active",
+                activityLabel: resolved
+                  ? "ESP32 Emergency Resolved"
+                  : "ESP32 Emergency Activated",
+                triggered_at: timestamp
+              }, ...previous.filter(event =>
+                event.id !== `esp32-${status.instance_id}-${eventId}`
+              )].slice(0, 100));
+              if (resolved) {
+                applyDeviceSafeStateRef.current();
+                esp32ResetSyncPending.current = true;
+                void resolveActiveSupabaseEmergencyRef.current();
+              }
+            }
+          }
+          if (newBackendInstance ||
+              eventId >= Number(esp32StatusRef.current.event_id || 0)) {
+            setEsp32Status({ ...status, apiConnected: true });
+          }
+        }
+      } catch (error) {
+        if (active) {
+          setEsp32Status(previous => ({
+            ...previous,
+            connected: false,
+            apiConnected: false,
+            statusError: error.message
+          }));
+        }
+      } finally {
+        if (active) {
+          timeoutId = window.setTimeout(pollEsp32Status, 1000);
+        }
+      }
+    }
+
+    void pollEsp32Status();
+    return () => {
+      active = false;
+      window.clearTimeout(timeoutId);
+    };
+  }, []);
   function stopLocationAcquisition() {
     if (locationWatchId.current !== null && navigator.geolocation) {
       navigator.geolocation.clearWatch(locationWatchId.current);
@@ -61,10 +172,84 @@ export default function App() {
     }
   }
 
+  function applyDeviceSafeState() {
+    stopLocationAcquisition();
+    locationRequestId.current += 1;
+    bestLocation.current = null;
+    setEmergency(false);
+    setEmergencyTimestamp(new Date().toISOString());
+    setEmergencyLocation(null);
+    setLocationTimezone(null);
+    setLocationStatus("idle");
+    setLocationError("");
+  }
+
+  async function resolveActiveSupabaseEmergency() {
+    if (!isSupabaseConfigured) {
+      esp32ResetSyncPending.current = false;
+      return;
+    }
+    if (backendStatusRef.current !== "ready" || !userIdRef.current) {
+      return;
+    }
+    if (esp32ResetSyncPromise.current) return esp32ResetSyncPromise.current;
+
+    const operation = (async () => {
+      try {
+        const records = await getEmergencyEvents();
+        const activeRecord = records.find(event => event.status === "active");
+        setEvents(records);
+        const activeId = activeRecord?.id || null;
+        activeEventIdRef.current = activeId;
+        setActiveEventId(activeId);
+        if (!activeId) {
+          setEmergency(false);
+          esp32ResetSyncPending.current = false;
+          return;
+        }
+
+        const resolvedEvent = await resolveEmergencyEvent(activeId, new Date().toISOString());
+        activeEventIdRef.current = null;
+        setActiveEventId(null);
+        setEvents(previous => previous.map(event =>
+          event.id === resolvedEvent.id ? resolvedEvent : event
+        ));
+        setEmergency(false);
+        setEmergencyTimestamp(resolvedEvent.triggered_at);
+        setEmergencyLocation(resolvedEvent.latitude == null ? null : {
+          latitude: resolvedEvent.latitude,
+          longitude: resolvedEvent.longitude,
+          accuracy: resolvedEvent.accuracy_m,
+          timezone: resolvedEvent.location_timezone
+        });
+        setLocationTimezone(resolvedEvent.location_timezone || null);
+        setLocationStatus(resolvedEvent.location_status === "available" ? "success" : "idle");
+        setLocationError(resolvedEvent.location_error || "");
+        setBackendError("");
+        esp32ResetSyncPending.current = false;
+      } catch (error) {
+        setBackendError(`ESP32 is safe, but the active Supabase emergency could not be resolved: ${error.message}`);
+        esp32ResetSyncPending.current = true;
+      }
+    })();
+    esp32ResetSyncPromise.current = operation;
+    try {
+      await operation;
+    } finally {
+      if (esp32ResetSyncPromise.current === operation) {
+        esp32ResetSyncPromise.current = null;
+      }
+    }
+  }
+
+  applyDeviceSafeStateRef.current = applyDeviceSafeState;
+  resolveActiveSupabaseEmergencyRef.current = resolveActiveSupabaseEmergency;
+
   function applyEmergencyEvents(records) {
     setEvents(records);
     const activeEvent = records.find(event => event.status === "active");
     const displayedEvent = activeEvent || records[0];
+    activeEventIdRef.current = activeEvent?.id || null;
     setActiveEventId(activeEvent?.id || null);
     setEmergency(Boolean(activeEvent));
     setEmergencyTimestamp(displayedEvent?.triggered_at || null);
@@ -95,6 +280,7 @@ export default function App() {
         const sessionUserId = await initializeAnonymousSession();
         if (cancelled) return;
         setUserId(sessionUserId);
+        userIdRef.current = sessionUserId;
 
         let records = await getEmergencyEvents();
         const interruptedEvent = records.find(event =>
@@ -112,7 +298,17 @@ export default function App() {
 
         applyEmergencyEvents(records);
         setBackendStatus("ready");
+        backendStatusRef.current = "ready";
         setBackendError("");
+        if (esp32StatusRef.current.apiConnected &&
+            esp32StatusRef.current.connected &&
+            !esp32StatusRef.current.emergency_active &&
+            records.some(event => event.status === "active")) {
+          esp32ResetSyncPending.current = true;
+        }
+        if (esp32ResetSyncPending.current) {
+          void resolveActiveSupabaseEmergencyRef.current();
+        }
         unsubscribe = subscribeToEmergencyEvents(
           sessionUserId,
           async () => {
@@ -287,24 +483,105 @@ export default function App() {
     );
   }
 
+  async function synchronizeEsp32(target) {
+    setEsp32CommandStatus({
+      state: "pending",
+      target,
+      message: `Waiting for ESP32 to acknowledge ${target.toUpperCase()}...`
+    });
+    try {
+      const response = await fetch(`${FIRE_API_URL}/api/esp32/command`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          request_id: crypto.randomUUID(),
+          target
+        })
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        const detail = typeof result.detail === "string"
+          ? result.detail
+          : result.detail?.error || `Backend returned HTTP ${response.status}.`;
+        throw new Error(detail);
+      }
+      if (result.acknowledged !== true) {
+        throw new Error("The ESP32 did not acknowledge the requested state.");
+      }
+
+      const emergencyActive = result.state === "EMERGENCY";
+      setEsp32Status(previous => ({
+        ...previous,
+        connected: true,
+        apiConnected: true,
+        emergency_active: emergencyActive,
+        state_known: true,
+        event_id: Math.max(Number(previous.event_id) || 0, Number(result.event_id) || 0),
+        last_event: result.last_event || previous.last_event,
+        last_event_at: result.last_event_at || previous.last_event_at
+      }));
+      setEsp32CommandStatus({
+        state: "acknowledged",
+        target,
+        message: `ESP32 acknowledged ${result.state}${result.reused_acknowledgement ? " (existing acknowledged state)" : ""}.`
+      });
+      return result;
+    } catch (error) {
+      setEsp32CommandStatus({
+        state: "failed",
+        target,
+        message: `ESP32 ${target} command failed: ${error.message}`
+      });
+      throw error;
+    }
+  }
+
   async function triggerAlert(source = "manual") {
-    if (backendStatus !== "ready" || !userId || actionBusyRef.current || emergency) return false;
+    if (backendStatus !== "ready" || !userId || actionBusyRef.current ||
+        emergency ||
+        (esp32Status.apiConnected && esp32Status.connected && esp32Status.emergency_active)) {
+      return false;
+    }
     actionBusyRef.current = true;
     setActionBusy(true);
     setBackendError("");
     try {
+      try {
+        await synchronizeEsp32("emergency");
+      } catch (error) {
+        if (source !== "camera") {
+          setBackendError(`Emergency was not activated: ${error.message}`);
+          return false;
+        }
+        setBackendError(`Camera emergency was recorded, but ESP32 synchronization failed: ${error.message}`);
+      }
       const triggeredAt = new Date().toISOString();
       const record = await createEmergencyEvent(userId, triggeredAt, source);
+      activeEventIdRef.current = record.id;
       setActiveEventId(record.id);
       setEmergency(true);
       setEmergencyTimestamp(triggeredAt);
       setLocationTimezone(null);
       setEvents(previous => [record, ...previous.filter(event => event.id !== record.id)]);
       setLocationStatus("loading");
-      requestEmergencyLocation(record.id);
+      const latestDeviceState = esp32StatusRef.current;
+      const resetAfterActivation =
+        latestDeviceState.apiConnected &&
+        latestDeviceState.connected &&
+        latestDeviceState.state_known &&
+        !latestDeviceState.emergency_active &&
+        ["reset", "safe"].includes(latestDeviceState.last_event) &&
+        Date.parse(latestDeviceState.last_event_at || "") >= Date.parse(triggeredAt);
+      if (resetAfterActivation) {
+        applyDeviceSafeState();
+        esp32ResetSyncPending.current = true;
+        void resolveActiveSupabaseEmergencyRef.current();
+      } else {
+        requestEmergencyLocation(record.id);
+      }
       return true;
     } catch (error) {
-      setBackendError(`Emergency could not be saved to Supabase: ${error.message}`);
+      setBackendError(`ESP32 acknowledged emergency, but it could not be saved to Supabase: ${error.message}`);
       return false;
     } finally {
       actionBusyRef.current = false;
@@ -313,31 +590,17 @@ export default function App() {
   }
 
   async function resetAlert() {
-    if (!activeEventId || actionBusyRef.current) return;
+    if (actionBusyRef.current) return;
     actionBusyRef.current = true;
     setActionBusy(true);
     setBackendError("");
     try {
-      const resolvedAt = new Date().toISOString();
-      const resolvedEvent = await resolveEmergencyEvent(activeEventId, resolvedAt);
-      stopLocationAcquisition();
-      locationRequestId.current += 1;
-      bestLocation.current = null;
-      setEvents(previous => previous.map(event => event.id === resolvedEvent.id ? resolvedEvent : event));
-      setActiveEventId(null);
-      setEmergency(false);
-      setEmergencyTimestamp(resolvedEvent.triggered_at);
-      setEmergencyLocation(resolvedEvent.latitude == null ? null : {
-        latitude: resolvedEvent.latitude,
-        longitude: resolvedEvent.longitude,
-        accuracy: resolvedEvent.accuracy_m,
-        timezone: resolvedEvent.location_timezone
-      });
-      setLocationTimezone(resolvedEvent.location_timezone || null);
-      setLocationStatus(resolvedEvent.location_status === "available" ? "success" : "idle");
-      setLocationError(resolvedEvent.location_error || "");
+      await synchronizeEsp32("reset");
+      applyDeviceSafeState();
+      esp32ResetSyncPending.current = true;
+      await resolveActiveSupabaseEmergency();
     } catch (error) {
-      setBackendError(`Emergency could not be resolved in Supabase: ${error.message}`);
+      setBackendError(`ESP32 reset was not acknowledged; emergency remains active: ${error.message}`);
     } finally {
       actionBusyRef.current = false;
       setActionBusy(false);
@@ -350,6 +613,32 @@ export default function App() {
     connection_error: "Supabase unavailable",
     ready: "Supabase Connected"
   }[backendStatus];
+  const esp32StatusUnknown = !esp32Status.apiConnected ||
+    !esp32Status.connected || !esp32Status.state_known;
+  const esp32EmergencyActive = !esp32StatusUnknown && esp32Status.emergency_active;
+  const activeSupabaseEvent = events.find(event => event.status === "active");
+  const databaseEventTime = Date.parse(activeSupabaseEvent?.triggered_at || "");
+  const deviceEventTime = Date.parse(esp32Status.last_event_at || "");
+  const databaseEventNewerThanDevice = activeSupabaseEvent && (
+    !esp32Status.connected ||
+    !esp32Status.state_known ||
+    !esp32Status.last_event_at ||
+    !Number.isFinite(databaseEventTime) ||
+    !Number.isFinite(deviceEventTime) ||
+    databaseEventTime > deviceEventTime
+  );
+  const displayedEmergency = esp32EmergencyActive ||
+    (emergency && (esp32StatusUnknown || databaseEventNewerThanDevice));
+  const activityEvents = [...events, ...esp32Events].sort((left, right) =>
+    Date.parse(right.triggered_at) - Date.parse(left.triggered_at)
+  );
+  const systemStatusClass = displayedEmergency
+    ? "danger"
+    : esp32StatusUnknown ? "pending" : "safe";
+  const systemStatusLabel = esp32EmergencyActive
+    ? "EMERGENCY ACTIVE"
+    : displayedEmergency ? "EMERGENCY DETECTED"
+      : esp32StatusUnknown ? "ESP32 STATUS UNAVAILABLE" : "SYSTEM SAFE";
 
   return (
     <div className="dashboard">
@@ -430,7 +719,7 @@ export default function App() {
         </motion.section>
 
         <motion.section
-          className={`status-banner ${emergency ? "danger" : backendStatus === "ready" ? "safe" : "pending"}`}
+          className={`status-banner ${systemStatusClass}`}
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.08 }}
@@ -441,22 +730,32 @@ export default function App() {
 
           <div className="status-copy">
             <p>SYSTEM STATUS</p>
-            <h2>
-              {backendStatus !== "ready"
-                ? "SYSTEM SYNCING"
-                : emergency ? "EMERGENCY ACTIVE" : <>SYSTEM <em>SAFE</em></>}
-            </h2>
+            <h2>{systemStatusLabel}</h2>
             <span>
-              {backendStatus !== "ready"
-                ? "Waiting for the current emergency status from Supabase"
-                : emergency ? "Emergency is active and recorded in Supabase" : "No active emergency"}
+              {esp32EmergencyActive
+                ? emergency
+                  ? "Emergency active in Supabase and on ESP32"
+                  : "ESP32 emergency active · display only; not saved to Supabase"
+                : displayedEmergency
+                  ? "Emergency is active and recorded in Supabase"
+                  : esp32StatusUnknown
+                    ? !esp32Status.apiConnected
+                      ? `Could not read ESP32 emergency state: ${esp32Status.statusError || "backend unavailable"}`
+                      : !esp32Status.connected
+                        ? "ESP32 disconnected; showing last known dashboard emergency state"
+                        : "ESP32 connected; waiting for its initial state report"
+                    : esp32Status.connected
+                      ? emergency
+                        ? "ESP32 is safe; resolving stale Supabase emergency state"
+                        : "ESP32 reports system safe"
+                      : "No active emergency; ESP32 disconnected"}
             </span>
           </div>
 
           <div className="status-summary">
-            <span className={`status-badge ${emergency ? "is-emergency" : backendStatus !== "ready" ? "is-pending" : ""}`}>
+            <span className={`status-badge ${displayedEmergency ? "is-emergency" : esp32StatusUnknown ? "is-pending" : ""}`}>
               <span className="status-dot" />
-              {backendStatus !== "ready" ? "SYNCING" : emergency ? "EMERGENCY" : "SAFE"}
+              {displayedEmergency ? "EMERGENCY" : esp32StatusUnknown ? "UNKNOWN" : "SAFE"}
             </span>
           </div>
         </motion.section>
@@ -476,8 +775,20 @@ export default function App() {
           <motion.div className="stat-card" whileHover={{ y: -5 }}>
             <Cpu size={23}/>
             <p>ESP32 Device</p>
-            <h3>Not Connected</h3>
-            <small>Hardware integration pending</small>
+            <h3>{!esp32Status.apiConnected
+              ? "ESP32 Status Unavailable"
+              : esp32Status.connected
+                ? "ESP32 Connected"
+                : "ESP32 Disconnected"}</h3>
+            <small>
+              {!esp32Status.apiConnected
+                ? `ESP32 status unavailable: ${esp32Status.statusError || "backend unavailable"}`
+                : esp32Status.connected
+                  ? !esp32Status.state_known
+                    ? `${esp32Status.port} · ${esp32Status.baud_rate} baud · waiting for ESP32 state report`
+                    : `${esp32Status.port} · ${esp32Status.baud_rate} baud · ${esp32Status.emergency_active ? "EMERGENCY ACTIVE" : "SYSTEM SAFE"}`
+                  : `${esp32Status.port} unavailable · reconnecting · last state unconfirmed (${esp32Status.emergency_active ? "EMERGENCY" : "SAFE"})`}
+            </small>
           </motion.div>
 
           <motion.div className="stat-card" whileHover={{ y: -5 }}>
@@ -509,6 +820,7 @@ export default function App() {
               <span className={`tag backend-tag ${backendStatus === "ready" ? "is-ready" : ""}`}>
                 {backendStatus === "ready" ? "SUPABASE LOGGED" : dashboardConnectionLabel.toUpperCase()}
               </span>
+              <span className="tag">PROTOTYPE</span>
             </div>
             <p className="muted control-text">
               Create a persistent emergency record, request this browser's location, and save the result to Supabase.
@@ -516,19 +828,32 @@ export default function App() {
             <button
               className="emergency-btn"
               onClick={() => triggerAlert("manual")}
-              disabled={backendStatus !== "ready" || actionBusy || emergency}
+              disabled={backendStatus !== "ready" || actionBusy || displayedEmergency}
             >
               <Flame size={19}/>
               {backendStatus === "connecting"
                 ? "Connecting to Supabase..."
-                : actionBusy && !emergency ? "Saving Emergency..."
+                : actionBusy ? "Synchronizing with ESP32..."
                   : emergency ? "Emergency Active" : "Activate Emergency"}
             </button>
-            <button className="reset-btn" onClick={resetAlert} disabled={!emergency || actionBusy}>
-              <RotateCcw size={18}/> Resolve Emergency
+            <button
+              className="reset-btn"
+              onClick={resetAlert}
+              disabled={(!displayedEmergency && !activeEventId &&
+                !esp32ResetSyncPending.current) || actionBusy}
+            >
+              <RotateCcw size={18}/>
+              {esp32ResetSyncPending.current && !displayedEmergency
+                ? "Retry Emergency Reset Sync"
+                : "Resolve Emergency"}
             </button>
             <div className="notice">
-              This records manual or AI camera alerts and device GPS. ESP32 and SMS integrations are not connected; AI detections are advisory and must be verified.
+              Prototype only — not a production safety control. Website controls require an ESP32 serial acknowledgement. Manual and AI camera alerts retain the existing Supabase history and location workflow. ESP32-originated emergencies never create Supabase records or send SMS; a reset resolves an existing active record.
+            </div>
+            <div className={`notice command-status ${esp32CommandStatus.state}`} role="status" aria-live="polite">
+              <strong>ESP32 command: </strong>{esp32CommandStatus.message}
+              {!esp32Status.connected && esp32Status.apiConnected &&
+                <span> Serial device disconnected on {esp32Status.port}.</span>}
             </div>
           </div>
         </section>
@@ -549,21 +874,23 @@ export default function App() {
         <section className="panel history" id="alert-history">
           <div className="panel-heading">
             <h3><Activity size={20}/> Recent Activity</h3>
-            <span className="tag">SUPABASE</span>
+            <span className="tag">SUPABASE + ESP32</span>
           </div>
-          {events.length === 0 ? (
-            <p className="muted">No emergency records have been stored yet.</p>
+          {activityEvents.length === 0 ? (
+            <p className="muted">No recent activity.</p>
           ) : (
-            events.map(event => (
+            activityEvents.map(event => (
               <div className={`event ${event.status === "resolved" ? "resolved" : ""}`} key={event.id}>
                 <Flame size={18}/>
                 <span>
-                  {event.status === "active"
+                  {event.activityLabel || (event.status === "active"
                     ? (event.source === "camera" ? "Possible fire alert (AI camera)" : "Emergency activated")
-                    : "Emergency resolved"}
+                    : "Emergency resolved")}
                   {event.latitude != null && ` · ${Number(event.latitude).toFixed(5)}, ${Number(event.longitude).toFixed(5)}`}
                 </span>
-                <time>{formatTimestamp(event.triggered_at, event.location_timezone)}</time>
+                <time dateTime={event.triggered_at}>
+                  {formatTimestamp(event.triggered_at, event.location_timezone)}
+                </time>
               </div>
             ))
           )}
