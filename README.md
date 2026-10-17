@@ -1,4 +1,4 @@
-# hackathon-1
+
 SafeGuard ESP32 — Smart Industrial Emergency Alert System
 
 Project Overview
@@ -46,3 +46,6 @@ Everything done
 Safety Note
 
 This is a hackathon prototype, not a certified industrial emergency-stop system.
+
+Final Reference Images are named as EmergencyModePhoto.jpeg and NormalModePhoto.jpeg
+Video is named as ProjectDemoVideo.mp4
