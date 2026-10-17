@@ -610,71 +610,1266 @@
         min-width: 58px;
       }
     }
+
+    :root {
+      --page: #030408;
+      --surface: #080910;
+      --surface-alt: #0b0d15;
+      --text: #eef4ff;
+      --muted: #8d9cb5;
+      --border: rgba(255, 35, 70, .38);
+      --hover: rgba(255, 28, 61, .09);
+      --input-bg: #090c14;
+      --input-text: #e9f0fc;
+      --accent: #ff254d;
+      --active-bg: rgba(255, 36, 68, .14);
+      --active-text: #ff506c;
+      --resolved-bg: rgba(0, 220, 179, .13);
+      --resolved-text: #00dfbb;
+      --glow: 0 0 16px rgba(255, 24, 58, .26), inset 0 0 12px rgba(255, 24, 58, .06);
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      background: var(--page) !important;
+      color: var(--text);
+    }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-size: 13px;
+    }
+
+    button,
+    input,
+    select {
+      font-family: inherit;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible {
+      outline: 2px solid #ff4565;
+      outline-offset: 2px;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 20;
+      display: flex;
+      width: 220px;
+      flex-direction: column;
+      padding: 20px 13px 12px;
+      border-right: 1px solid #fb2447;
+      background:
+        radial-gradient(ellipse at 2% 75%, rgba(143, 9, 24, .16), transparent 38%),
+        linear-gradient(180deg, #050408 0%, #030407 100%);
+      box-shadow: 3px 0 17px rgba(255, 25, 56, .32);
+    }
+
+    .brand {
+      gap: 10px;
+      min-height: 42px;
+      margin: 0 4px 27px;
+      color: #f5f7fc;
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      display: grid;
+      width: 35px;
+      height: 35px;
+      flex: 0 0 35px;
+      place-items: center;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: #ff365a;
+      filter: drop-shadow(0 0 7px rgba(255, 23, 58, .85));
+      font-size: 0;
+    }
+
+    .brand-icon svg {
+      width: 35px;
+      height: 35px;
+    }
+
+    .brand h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -.45px;
+    }
+
+    .brand h1 span {
+      color: #ff3459;
+    }
+
+    .brand .subtitle {
+      display: none;
+    }
+
+    .nav-label {
+      margin: 0 7px 11px;
+      color: #8993a8;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.35px;
+      text-transform: uppercase;
+    }
+
+    .main-nav {
+      display: grid;
+      gap: 5px;
+    }
+
+    .nav-item {
+      display: flex;
+      min-height: 42px;
+      align-items: center;
+      gap: 12px;
+      padding: 0 12px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      background: transparent;
+      color: #aab7ca;
+      text-align: left;
+      font-size: 12px;
+      transition: color .16s, background .16s, border-color .16s, box-shadow .16s;
+    }
+
+    .nav-item svg {
+      width: 20px;
+      height: 20px;
+      flex: 0 0 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.8;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      border-color: rgba(255, 34, 68, .82);
+      background: linear-gradient(100deg, rgba(255, 26, 58, .3), rgba(111, 8, 25, .19));
+      color: #fff;
+      box-shadow: 0 0 13px rgba(255, 24, 58, .36), inset 0 0 12px rgba(255, 24, 58, .1);
+    }
+
+    .nav-item.active svg,
+    .nav-item:hover svg {
+      color: #ff3d5d;
+      filter: drop-shadow(0 0 5px rgba(255, 36, 66, .65));
+    }
+
+    .nav-divider {
+      height: 1px;
+      margin: 13px 6px 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 35, 66, .78), transparent);
+    }
+
+    .sidebar-spacer {
+      flex: 1;
+      min-height: 40px;
+      background:
+        linear-gradient(180deg, transparent 65%, rgba(255, 14, 44, .08)),
+        repeating-linear-gradient(90deg, transparent 0 48px, rgba(255, 24, 56, .025) 49px, transparent 51px);
+    }
+
+    .system-status {
+      display: flex;
+      min-height: 54px;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 11px;
+      border: 1px solid rgba(255, 43, 72, .62);
+      border-radius: 11px;
+      background: linear-gradient(110deg, rgba(9, 19, 24, .96), rgba(10, 9, 15, .96));
+      box-shadow: var(--glow);
+    }
+
+    .system-status .dot {
+      width: 11px;
+      height: 11px;
+      flex: 0 0 11px;
+      box-shadow: 0 0 10px currentColor;
+    }
+
+    .system-status strong {
+      display: block;
+      color: #00e2be;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .system-status small {
+      display: block;
+      margin-top: 2px;
+      color: #91a1b6;
+      font-size: 9px;
+    }
+
+    .pulse-icon {
+      width: 21px;
+      height: 21px;
+      margin-left: auto;
+      color: #ff3458;
+      stroke: currentColor;
+      fill: none;
+      filter: drop-shadow(0 0 5px rgba(255, 36, 67, .7));
+    }
+
+    .sidebar-footer {
+      margin: 26px 5px 0;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255, 40, 69, .27);
+      color: #7f8ca3;
+      font-size: 9px;
+    }
+
+    .workspace {
+      width: calc(100% - 220px);
+      min-height: 100vh;
+      margin-left: 220px;
+      padding: 0 36px 13px 25px;
+    }
+
+    .hero {
+      position: relative;
+      display: flex;
+      min-height: 178px;
+      align-items: center;
+      overflow: hidden;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 38, 67, .53);
+      background:
+        radial-gradient(ellipse at 64% 60%, rgba(255, 14, 48, .34), transparent 30%),
+        radial-gradient(ellipse at 35% 100%, rgba(144, 8, 28, .34), transparent 38%),
+        repeating-linear-gradient(0deg, transparent 0 30px, rgba(255, 27, 58, .08) 31px, transparent 32px),
+        repeating-linear-gradient(90deg, transparent 0 44px, rgba(255, 27, 58, .07) 45px, transparent 46px),
+        linear-gradient(110deg, #05060a 2%, #10050b 48%, #06060b 100%);
+      box-shadow: inset 0 -18px 30px rgba(255, 13, 42, .07);
+    }
+
+    .hero::before {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, transparent 0 10%, rgba(255, 33, 59, .6) 10.1%, transparent 10.4%),
+        linear-gradient(0deg, transparent 0 71%, rgba(255, 33, 59, .55) 71.5%, transparent 72%),
+        linear-gradient(90deg, transparent 0 74%, rgba(255, 33, 59, .4) 74.2%, transparent 74.5%),
+        radial-gradient(circle at 23% 77%, #ff223c 0 2px, transparent 4px),
+        radial-gradient(circle at 52% 27%, #ff223c 0 2px, transparent 4px),
+        radial-gradient(circle at 76% 76%, #ff223c 0 2px, transparent 4px);
+      content: "";
+      opacity: .75;
+      pointer-events: none;
+    }
+
+    .hero::after {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #ff2446 30%, #ff2446 78%, transparent);
+      box-shadow: 0 0 9px #ff2446;
+      content: "";
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 2;
+      max-width: 55%;
+      padding: 45px 8px 19px;
+    }
+
+    .eyebrow {
+      margin-bottom: 10px;
+      color: #ff3658;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.6px;
+    }
+
+    .hero-copy h2 {
+      color: #f4f7fc;
+      font-size: clamp(25px, 2.45vw, 32px);
+      font-weight: 700;
+      letter-spacing: -.9px;
+      line-height: 1.13;
+    }
+
+    .hero-copy h2 span {
+      color: #ff2449;
+    }
+
+    .hero-copy p {
+      margin-top: 8px;
+      color: #aec0d9;
+      font-size: 12px;
+    }
+
+    .top-actions {
+      position: absolute;
+      z-index: 5;
+      top: 17px;
+      right: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .connection {
+      min-height: 34px;
+      gap: 8px;
+      margin: 0;
+      padding: 0 11px;
+      border: 1px solid rgba(255, 36, 69, .32);
+      border-radius: 10px;
+      background: rgba(7, 10, 15, .83);
+      color: #00dfbb;
+      font-size: 10px;
+      box-shadow: 0 0 10px rgba(255, 25, 57, .11);
+    }
+
+    .connection .dot {
+      width: 10px;
+      height: 10px;
+      box-shadow: 0 0 9px currentColor;
+    }
+
+    .button {
+      min-height: 34px;
+      padding: 8px 12px;
+      border: 1px solid rgba(255, 42, 73, .66);
+      border-radius: 9px;
+      background: rgba(8, 10, 16, .9);
+      color: #dbe5f4;
+      font-size: 10px;
+      font-weight: 600;
+      box-shadow: 0 0 9px rgba(255, 27, 57, .14);
+      transition: background .16s, border-color .16s, box-shadow .16s, transform .16s;
+    }
+
+    .button:hover {
+      border-color: #ff3659;
+      background: rgba(255, 25, 57, .16);
+      box-shadow: 0 0 13px rgba(255, 24, 58, .32);
+    }
+
+    .button:active {
+      transform: translateY(1px);
+    }
+
+    .button.primary {
+      border-color: #ff294d;
+      background: rgba(8, 10, 16, .9);
+      color: #e8edf6;
+    }
+
+    .button.primary:hover {
+      background: rgba(255, 31, 62, .2);
+    }
+
+    .device-card {
+      position: absolute;
+      z-index: 3;
+      top: 73px;
+      right: 0;
+      display: grid;
+      width: 284px;
+      grid-template-columns: 50px 1fr;
+      align-items: center;
+      column-gap: 11px;
+      row-gap: 5px;
+      padding: 10px 13px;
+      border: 1px solid rgba(255, 45, 75, .85);
+      border-radius: 13px;
+      background: linear-gradient(115deg, rgba(14, 12, 19, .94), rgba(5, 8, 14, .95));
+      box-shadow: 0 0 17px rgba(255, 24, 57, .28), inset 0 0 13px rgba(255, 25, 57, .09);
+    }
+
+    .device-icon {
+      display: grid;
+      width: 46px;
+      height: 46px;
+      grid-row: span 2;
+      place-items: center;
+      border: 1px solid rgba(255, 43, 73, .6);
+      border-radius: 11px;
+      background: rgba(255, 26, 59, .13);
+      color: #ff4565;
+      filter: drop-shadow(0 0 7px rgba(255, 35, 65, .5));
+    }
+
+    .device-icon svg {
+      width: 28px;
+      height: 28px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.7;
+    }
+
+    .device-name {
+      align-self: end;
+      color: #e4ebf5;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .device-caption {
+      align-self: start;
+      color: #7f9bb9;
+      font-size: 8px;
+      font-weight: 600;
+      letter-spacing: .55px;
+    }
+
+    .device-tags {
+      display: flex;
+      grid-column: 1 / -1;
+      gap: 8px;
+    }
+
+    .device-tags span {
+      flex: 1;
+      padding: 5px 8px;
+      border: 1px solid rgba(255, 39, 69, .38);
+      border-radius: 20px;
+      background: rgba(255, 31, 61, .07);
+      color: #a6bdd8;
+      text-align: center;
+      font-size: 9px;
+    }
+
+    .device-illustration {
+      position: absolute;
+      z-index: 1;
+      top: 18px;
+      right: 27%;
+      width: min(390px, 36%);
+      height: 150px;
+      filter: drop-shadow(0 0 14px rgba(255, 30, 60, .65));
+      opacity: .95;
+      transform: rotate(-3deg);
+      pointer-events: none;
+    }
+
+    .metrics {
+      gap: 14px;
+      margin-bottom: 15px;
+    }
+
+    .metric {
+      position: relative;
+      min-height: 99px;
+      padding: 13px 14px 10px 68px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 37, 69, .73);
+      border-radius: 12px;
+      background:
+        radial-gradient(ellipse at 12% 15%, rgba(255, 24, 56, .1), transparent 50%),
+        linear-gradient(135deg, #0b0d14, #07080e 80%);
+      box-shadow: var(--glow);
+    }
+
+    .metric::after {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      color: rgba(255, 39, 72, .8);
+      font-size: 20px;
+      line-height: 1;
+      content: attr(data-mark);
+      filter: drop-shadow(0 0 5px rgba(255, 25, 58, .55));
+    }
+
+    .metric-top {
+      justify-content: flex-start;
+    }
+
+    .metric-icon {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      display: grid;
+      width: 41px;
+      height: 41px;
+      place-items: center;
+      border: 1px solid rgba(255, 37, 69, .57);
+      border-radius: 10px;
+      background: rgba(255, 22, 54, .11);
+      color: #ff3c5e;
+      font-size: 21px;
+      filter: drop-shadow(0 0 6px rgba(255, 34, 64, .54));
+    }
+
+    .metric-label {
+      color: #c5d2e5;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .metric-value {
+      margin-top: 8px;
+      color: #f0f4fb;
+      font-size: 25px;
+      line-height: 1;
+    }
+
+    .metric-note {
+      margin-top: 4px;
+      color: #8ea0b8;
+      font-size: 9px;
+    }
+
+    .panel {
+      display: flex;
+      min-height: 390px;
+      flex-direction: column;
+      border: 1px solid rgba(255, 39, 69, .78);
+      border-radius: 13px;
+      background: linear-gradient(145deg, #090b12, #05060b);
+      box-shadow: 0 0 17px rgba(255, 24, 57, .23), inset 0 0 14px rgba(255, 21, 54, .04);
+    }
+
+    .panel-header {
+      min-height: 61px;
+      flex: 0 0 auto;
+      padding: 11px 17px;
+      border-bottom: 1px solid rgba(255, 41, 71, .27);
+      background: linear-gradient(90deg, rgba(255, 25, 57, .065), transparent 48%);
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .panel-title-icon {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border: 1px solid rgba(255, 39, 70, .63);
+      border-radius: 9px;
+      background: rgba(255, 22, 54, .12);
+      color: #ff4564;
+      filter: drop-shadow(0 0 7px rgba(255, 28, 58, .5));
+    }
+
+    .panel-title-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.8;
+    }
+
+    .panel-header h2 {
+      color: #e9effa;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .panel-header p {
+      margin-top: 3px;
+      color: #90a3bd;
+      font-size: 10px;
+    }
+
+    .columns-options {
+      max-height: 60vh;
+      overflow-y: auto;
+      border-color: rgba(255, 43, 74, .7);
+      background: #090b12;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, .6), var(--glow);
+    }
+
+    .columns-options input {
+      accent-color: #ff3155;
+    }
+
+    .filters {
+      grid-template-columns: minmax(180px, 1.6fr) minmax(130px, .7fr) minmax(130px, .7fr) auto;
+      gap: 10px;
+      padding: 11px 13px;
+      border-bottom: 1px solid rgba(255, 37, 69, .22);
+      background: rgba(2, 4, 9, .4);
+    }
+
+    .field {
+      min-height: 35px;
+      padding: 8px 11px;
+      border: 1px solid rgba(255, 45, 75, .39);
+      border-radius: 9px;
+      background: #080b13;
+      color: var(--input-text);
+      font-size: 10px;
+      box-shadow: inset 0 1px 7px rgba(0, 0, 0, .4);
+    }
+
+    .field:focus {
+      border-color: #ff4565;
+      box-shadow: 0 0 10px rgba(255, 33, 65, .2);
+    }
+
+    .field::placeholder {
+      color: #71829a;
+    }
+
+    .table-wrap {
+      flex: 1 1 auto;
+      min-height: 0;
+      padding: 0 12px;
+      background: transparent;
+    }
+
+    table {
+      min-width: 940px;
+      table-layout: fixed;
+      font-size: 10px;
+    }
+
+    thead {
+      background: #0b0e17;
+    }
+
+    th {
+      height: 34px;
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(255, 39, 69, .34);
+      color: #98a9c2;
+      font-size: 9px;
+      letter-spacing: .28px;
+    }
+
+    th button {
+      color: inherit;
+    }
+
+    th button:hover {
+      color: #ff4a67;
+    }
+
+    td {
+      height: 41px;
+      max-width: none;
+      overflow: hidden;
+      padding: 7px 12px;
+      border-bottom: 1px solid rgba(255, 40, 68, .2);
+      color: #b8c6d9;
+      font-size: 10px;
+      text-overflow: ellipsis;
+    }
+
+    tbody tr {
+      background: rgba(3, 5, 10, .66);
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 26, 57, .08);
+    }
+
+    .event-id {
+      max-width: 125px;
+      color: #a9c8e9;
+      font-size: 10px;
+    }
+
+    .source {
+      padding: 4px 9px;
+      border-color: rgba(255, 44, 75, .62);
+      border-radius: 20px;
+      background: rgba(255, 25, 56, .06);
+      color: #c9d5e6;
+      font-size: 9px;
+      font-weight: 500;
+    }
+
+    .status {
+      padding: 4px 9px;
+      border: 1px solid rgba(0, 220, 177, .45);
+      border-radius: 20px;
+      font-size: 9px;
+    }
+
+    .status::before {
+      width: 7px;
+      height: 7px;
+      box-shadow: 0 0 6px currentColor;
+    }
+
+    .status.active {
+      border-color: rgba(255, 54, 83, .52);
+    }
+
+    .map-link {
+      color: #80b6e9;
+      font-size: 10px;
+    }
+
+    .empty {
+      background: transparent;
+      color: #97a8c0;
+    }
+
+    .empty strong {
+      color: #e7edf7;
+    }
+
+    .table-footer {
+      min-height: 41px;
+      flex: 0 0 auto;
+      padding: 7px 13px;
+      border-top: 1px solid rgba(255, 38, 67, .22);
+      background: rgba(4, 6, 11, .7);
+    }
+
+    .footer-info {
+      color: #8da0ba;
+      font-size: 10px;
+    }
+
+    .pagination {
+      gap: 5px;
+    }
+
+    .pagination .button {
+      min-width: 29px;
+      min-height: 27px;
+      padding: 4px 7px;
+      font-size: 12px;
+    }
+
+    .page-number {
+      min-width: 27px;
+      padding: 6px;
+      border: 1px solid rgba(255, 35, 66, .8);
+      border-radius: 7px;
+      background: rgba(255, 27, 58, .2);
+      color: #fff;
+      font-size: 10px;
+    }
+
+    .message {
+      margin: 0 0 11px;
+      border-color: rgba(255, 44, 73, .55);
+      border-radius: 9px;
+      background: #0a0c13;
+    }
+
+    .message.error {
+      border-color: #a62b3e;
+      background: #1a080d;
+      color: #ff9dab;
+    }
+
+    .bottom-bar {
+      display: flex;
+      min-height: 38px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 9px;
+      padding: 6px 14px;
+      border: 1px solid rgba(255, 41, 71, .72);
+      border-radius: 10px;
+      background:
+        linear-gradient(90deg, rgba(255, 25, 58, .09), transparent 34%, transparent 70%, rgba(255, 25, 58, .08)),
+        #080a11;
+      box-shadow: 0 0 12px rgba(255, 24, 57, .17);
+      color: #9cb1cb;
+      font-size: 9px;
+    }
+
+    .bottom-brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: #e3eaf5;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .bottom-brand svg,
+    .bottom-pulse {
+      width: 20px;
+      height: 20px;
+      color: #ff405f;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.8;
+      filter: drop-shadow(0 0 5px rgba(255, 34, 64, .58));
+    }
+
+    .bottom-separator {
+      width: 1px;
+      height: 16px;
+      background: #ff3859;
+    }
+
+    .bottom-tagline {
+      margin-left: auto;
+      color: #839ab6;
+      font-size: 9px;
+    }
+
+    .footer-note {
+      display: none;
+    }
+
+    .last-updated-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      clip-path: inset(50%);
+    }
+
+    @media (min-width: 1500px) {
+      .workspace {
+        padding-right: 42px;
+        padding-left: 30px;
+      }
+    }
+
+    @media (max-width: 1050px) {
+      .sidebar {
+        width: 194px;
+      }
+
+      .workspace {
+        width: calc(100% - 194px);
+        margin-left: 194px;
+        padding-right: 20px;
+        padding-left: 18px;
+      }
+
+      .device-card {
+        width: 245px;
+      }
+
+      .device-illustration {
+        right: 29%;
+        width: 34%;
+      }
+    }
+
+    @media (max-width: 760px) {
+      body {
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        position: relative;
+        inset: auto;
+        width: 100%;
+        min-height: auto;
+        padding: 11px 13px 9px;
+        border-right: 0;
+        border-bottom: 1px solid #fb2447;
+        box-shadow: 0 3px 14px rgba(255, 25, 56, .28);
+      }
+
+      .brand {
+        margin: 0 0 9px 3px;
+      }
+
+      .nav-label,
+      .sidebar-spacer,
+      .system-status,
+      .sidebar-footer,
+      .nav-divider {
+        display: none;
+      }
+
+      .main-nav {
+        display: flex;
+        gap: 5px;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+
+      .nav-item {
+        min-height: 37px;
+        flex: 0 0 auto;
+        gap: 7px;
+        padding: 0 10px;
+        font-size: 10px;
+      }
+
+      .nav-item svg {
+        width: 16px;
+        height: 16px;
+        flex-basis: 16px;
+      }
+
+      .workspace {
+        width: 100%;
+        min-height: calc(100vh - 110px);
+        margin: 0;
+        padding: 0 14px 14px;
+      }
+
+      .hero {
+        min-height: 166px;
+        margin-bottom: 12px;
+      }
+
+      .hero-copy {
+        max-width: 62%;
+        padding-top: 51px;
+      }
+
+      .hero-copy h2 {
+        font-size: 25px;
+      }
+
+      .hero-copy p {
+        max-width: 340px;
+        line-height: 1.5;
+      }
+
+      .device-card {
+        top: auto;
+        right: 0;
+        bottom: 11px;
+        width: 210px;
+        grid-template-columns: 37px 1fr;
+        padding: 7px 9px;
+      }
+
+      .device-icon {
+        width: 35px;
+        height: 35px;
+      }
+
+      .device-icon svg {
+        width: 23px;
+        height: 23px;
+      }
+
+      .device-illustration {
+        top: 20px;
+        right: 18%;
+        width: 37%;
+        height: 120px;
+        opacity: .62;
+      }
+
+      .top-actions {
+        top: 10px;
+      }
+
+      .metrics {
+        gap: 9px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .workspace {
+        padding-right: 10px;
+        padding-left: 10px;
+      }
+
+      .hero {
+        min-height: 210px;
+        align-items: flex-start;
+      }
+
+      .hero-copy {
+        max-width: 100%;
+        padding: 56px 5px 0;
+      }
+
+      .hero-copy h2 {
+        font-size: 23px;
+      }
+
+      .hero-copy p {
+        max-width: 90%;
+        font-size: 10px;
+      }
+
+      .eyebrow {
+        font-size: 8px;
+      }
+
+      .top-actions {
+        right: 0;
+        gap: 6px;
+      }
+
+      .connection {
+        min-height: 30px;
+        padding: 0 7px;
+        font-size: 8px;
+      }
+
+      .top-actions .button {
+        min-height: 30px;
+        padding: 6px 8px;
+        font-size: 9px;
+      }
+
+      .device-card {
+        right: 0;
+        bottom: 8px;
+        width: 186px;
+        grid-template-columns: 32px 1fr;
+        column-gap: 8px;
+        padding: 6px 8px;
+      }
+
+      .device-icon {
+        width: 31px;
+        height: 31px;
+      }
+
+      .device-name {
+        font-size: 9px;
+      }
+
+      .device-tags {
+        gap: 4px;
+      }
+
+      .device-tags span {
+        padding: 4px 5px;
+        font-size: 8px;
+      }
+
+      .device-illustration {
+        top: 38px;
+        right: 5%;
+        width: 48%;
+        height: 100px;
+      }
+
+      .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .metric {
+        min-height: 91px;
+        padding: 12px 9px 9px 52px;
+      }
+
+      .metric-icon {
+        top: 12px;
+        left: 9px;
+        width: 34px;
+        height: 34px;
+        font-size: 17px;
+      }
+
+      .metric-label {
+        font-size: 9px;
+      }
+
+      .metric-value {
+        font-size: 22px;
+      }
+
+      .metric-note {
+        font-size: 8px;
+      }
+
+      .panel {
+        min-height: 380px;
+      }
+
+      .panel-header {
+        padding: 10px;
+      }
+
+      .panel-title {
+        gap: 8px;
+      }
+
+      .panel-title-icon {
+        width: 33px;
+        height: 33px;
+      }
+
+      .filters {
+        grid-template-columns: 1fr 1fr;
+        padding: 9px;
+      }
+
+      .search-field {
+        grid-column: 1 / -1;
+      }
+
+      #clearFiltersButton {
+        grid-column: 1 / -1;
+      }
+
+      .table-wrap {
+        padding: 0 8px;
+      }
+
+      .table-footer {
+        gap: 8px;
+        padding: 7px 9px;
+      }
+
+      .footer-info {
+        font-size: 9px;
+      }
+
+      .bottom-bar {
+        flex-wrap: wrap;
+        gap: 7px;
+        font-size: 8px;
+      }
+
+      .bottom-tagline {
+        display: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+      }
+    }
   </style>
 </head>
 
 <body>
-  <main class="app">
-
-    <header class="topbar">
-      <div class="brand">
-        <div class="brand-icon">S</div>
-        <div>
-          <h1>SafeGuard</h1>
-          <p class="subtitle">Emergency monitoring system</p>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#" aria-label="SafeGuard AI dashboard" data-view="dashboard">
+        <div class="brand-icon" aria-hidden="true">
+          <svg viewBox="0 0 40 40" fill="none">
+            <path d="M20 3.5 33 8v10.3c0 8.1-5.2 14.1-13 18.2-7.8-4.1-13-10.1-13-18.2V8l13-4.5Z" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="m13.2 19.6 4.5 4.5 9.3-10" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </div>
-      </div>
+        <div><h1>SafeGuard <span>AI</span></h1><p class="subtitle">Emergency monitoring system</p></div>
+      </a>
 
-      <div class="top-actions">
-        <div class="connection">
-          <span id="connectionDot" class="dot"></span>
-          <span id="connectionText">Connecting...</span>
+      <p class="nav-label">Main navigation</p>
+      <nav class="main-nav" aria-label="Main navigation">
+        <button class="nav-item active" type="button" data-view="dashboard" aria-current="page">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z"/></svg>
+          Dashboard
+        </button>
+        <button class="nav-item" type="button" data-view="camera">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"/><path d="m16 11 6-4v12l-6-4"/></svg>
+          Camera Monitoring
+        </button>
+        <button class="nav-item" type="button" data-view="alerts">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
+          Alert History
+        </button>
+        <button class="nav-item" type="button" data-view="esp32">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4m6-4v4M9 18v4m6-4v4M2 9h4m-4 6h4m12-6h4m-4 6h4"/></svg>
+          ESP32 Device
+        </button>
+      </nav>
+      <div class="nav-divider"></div>
+      <div class="sidebar-spacer" aria-hidden="true"></div>
+      <div class="system-status" aria-live="polite">
+        <span id="sidebarStatusDot" class="dot"></span>
+        <div><strong id="sidebarStatus">Connecting...</strong><small id="sidebarStatusDetail">Checking services...</small></div>
+        <svg class="pulse-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 13h4l3-7 4 13 3-8 2 2h4"/></svg>
+      </div>
+      <footer class="sidebar-footer">© 2025 SafeGuard AI. All rights reserved.</footer>
+    </aside>
+
+    <main class="workspace">
+      <header class="hero">
+        <div class="top-actions">
+          <div class="connection" role="status">
+            <span id="connectionDot" class="dot"></span>
+            <span id="connectionText">Connecting...</span>
+          </div>
+          <button class="button primary" id="refreshButton" type="button">↻ &nbsp;Refresh</button>
         </div>
-        <button class="button primary" id="refreshButton" type="button">↻ Refresh</button>
-      </div>
-    </header>
-
-    <section class="page-heading">
-      <div>
-        <h2>Emergency Events</h2>
-        <p>Monitor and review emergency records from your database.</p>
-      </div>
-      <p id="lastUpdated">Last updated: Not yet</p>
-    </section>
-
-    <section class="metrics">
-      <article class="metric">
-        <div class="metric-top">
-          <span class="metric-label">Total Events</span>
-          <span class="metric-icon">▤</span>
+        <div class="hero-copy">
+          <p class="eyebrow">EMERGENCY MONITORING SYSTEM</p>
+          <h2 id="heroTitle"><span id="heroTitlePrefix">Emergency</span> <span id="heroTitleAccent">Events</span></h2>
+          <p id="heroDescription">Monitor and review emergency records from your database.</p>
+          <span id="lastUpdated" class="last-updated-hidden">Last updated: Not yet</span>
         </div>
+        <svg class="device-illustration" viewBox="0 0 500 250" role="img" aria-label="Illustration of an ESP32 development board">
+          <defs>
+            <linearGradient id="boardFill" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#202630"/><stop offset=".55" stop-color="#111820"/><stop offset="1" stop-color="#090e14"/></linearGradient>
+            <linearGradient id="metalFill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#d0d4d6"/><stop offset="1" stop-color="#707985"/></linearGradient>
+            <pattern id="pins" width="16" height="14" patternUnits="userSpaceOnUse"><rect x="5" y="1" width="6" height="12" rx="1" fill="#d1a66b"/><path d="M6 2h4" stroke="#ffe0a2" stroke-width="1"/></pattern>
+          </defs>
+          <path d="m74 59 282-46 93 163-282 54L74 59Z" fill="url(#boardFill)" stroke="#fa234c" stroke-width="3"/>
+          <path d="m86 63 271-43 83 145-270 51L86 63Z" fill="none" stroke="#762035" stroke-width="2"/>
+          <path d="m100 58 30-5 84 147-31 6Z" fill="url(#pins)"/><path d="m345 19 31-5 83 145-31 6Z" fill="url(#pins)"/>
+          <path d="m194 71 120-20 43 75-120 23-43-78Z" fill="#090b0f" stroke="#d42c4d" stroke-width="3"/>
+          <path d="m207 77 96-16 32 57-96 19-32-60Z" fill="url(#metalFill)" stroke="#f1a4af" stroke-width="2"/>
+          <path d="m216 86 79-13M223 97l78-13m-71 25 77-13" stroke="#48525e" stroke-width="2"/>
+          <text x="229" y="106" fill="#353c46" font-size="13" font-weight="700" transform="rotate(-9 229 106)">ESP32</text>
+          <path d="m107 82 36-6 27 48-36 7Z" fill="#06090d" stroke="#bd3450" stroke-width="2"/>
+          <path d="m119 89 12-2 14 25-12 2Z" fill="#aab2bc" stroke="#e3e6e8" stroke-width="2"/>
+          <path d="m320 143 31-6 16 28-31 6Z" fill="#090c11" stroke="#d73652" stroke-width="2"/>
+          <path d="m356 42 24-4 15 27-24 5Z" fill="#14191f" stroke="#ef3656" stroke-width="2"/>
+          <path d="m144 61 32-5m-10 22 29-5m148 46 36-7m-15 26 28-5" stroke="#ff294e" stroke-width="2"/>
+          <circle cx="131" cy="166" r="7" fill="#d8c89a"/><circle cx="399" cy="156" r="7" fill="#d8c89a"/>
+          <circle cx="131" cy="166" r="3" fill="#141820"/><circle cx="399" cy="156" r="3" fill="#141820"/>
+          <path d="m160 153 22-4m152-86 25-4m-102 117 21-4" stroke="#44d5cb" stroke-width="2" opacity=".7"/>
+        </svg>
+        <div class="device-card">
+          <div class="device-icon" aria-hidden="true"><svg viewBox="0 0 28 28"><rect x="6" y="6" width="16" height="16" rx="2"/><path d="M10 10h8v8h-8zM10 2v4m8-4v4m-8 16v4m8-4v4M2 10h4m-4 8h4m16-8h4m-4 8h4"/></svg></div>
+          <strong class="device-name">ESP32 DEVKIT</strong>
+          <span class="device-caption">THE HEART OF IDEAS</span>
+          <div class="device-tags"><span>IoT</span><span>Embedded</span><span>Creative Tech</span></div>
+        </div>
+      </header>
+
+    <section class="metrics" aria-label="Emergency event summary">
+      <article class="metric" data-mark="▤">
+        <div class="metric-top"><span class="metric-label">Total Events</span></div>
+        <span class="metric-icon" aria-hidden="true">▤</span>
         <div class="metric-value" id="totalCount">0</div>
         <p class="metric-note">All fetched records</p>
       </article>
 
-      <article class="metric">
-        <div class="metric-top">
-          <span class="metric-label">Active Events</span>
-          <span class="metric-icon">🚨</span>
-        </div>
+      <article class="metric" data-mark="♧">
+        <div class="metric-top"><span class="metric-label">Active Events</span></div>
+        <span class="metric-icon" aria-hidden="true">♧</span>
         <div class="metric-value" id="activeCount">0</div>
         <p class="metric-note">Awaiting resolution</p>
       </article>
 
-      <article class="metric">
-        <div class="metric-top">
-          <span class="metric-label">Resolved Events</span>
-          <span class="metric-icon">✓</span>
-        </div>
+      <article class="metric" data-mark="✓">
+        <div class="metric-top"><span class="metric-label">Resolved Events</span></div>
+        <span class="metric-icon" aria-hidden="true">✓</span>
         <div class="metric-value" id="resolvedCount">0</div>
         <p class="metric-note">Marked as resolved</p>
       </article>
 
-      <article class="metric">
-        <div class="metric-top">
-          <span class="metric-label">Camera Events</span>
-          <span class="metric-icon">◉</span>
-        </div>
+      <article class="metric" data-mark="◎">
+        <div class="metric-top"><span class="metric-label">Camera Events</span></div>
+        <span class="metric-icon" aria-hidden="true">◎</span>
         <div class="metric-value" id="cameraCount">0</div>
         <p class="metric-note">Detected by camera</p>
       </article>
@@ -682,17 +1877,20 @@
 
     <div id="message" class="message hidden" role="status"></div>
 
-    <section class="panel">
+    <section class="panel" aria-labelledby="recordsTitle">
       <div class="panel-header">
-        <div>
-          <h2>Event Records</h2>
-          <p id="recordSummary">Loading records...</p>
+        <div class="panel-title">
+          <span class="panel-title-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v6h5M9 13h6m-6 4h6"/></svg>
+          </span>
+          <div>
+            <h2 id="recordsTitle">Event Records</h2>
+            <p id="recordSummary">Loading records...</p>
+          </div>
         </div>
 
         <div class="columns-menu">
-          <button class="button" id="columnsButton" type="button" aria-expanded="false">
-            ☷ Columns
-          </button>
+          <button class="button" id="columnsButton" type="button" aria-expanded="false" aria-controls="columnsOptions">☷ &nbsp;Columns</button>
 
           <div class="columns-options hidden" id="columnsOptions">
             <label><input type="checkbox" data-column="id" checked> Event ID</label>
@@ -715,7 +1913,7 @@
           id="searchInput"
           class="field search-field"
           type="search"
-          placeholder="Search event ID, user ID, source..."
+          placeholder="⌕   Search event ID, user ID, source..."
           aria-label="Search events"
         >
 
@@ -724,6 +1922,7 @@
           <option value="manual">Manual</option>
           <option value="camera">Camera</option>
           <option value="esp32">ESP32</option>
+          <option value="sms">SMS</option>
         </select>
 
         <select id="statusFilter" class="field" aria-label="Filter by status">
@@ -732,7 +1931,7 @@
           <option value="resolved">Resolved</option>
         </select>
 
-        <button class="button" id="clearFiltersButton" type="button">Clear filters</button>
+        <button class="button" id="clearFiltersButton" type="button">⚲ &nbsp;Clear filters</button>
       </div>
 
       <div class="table-wrap">
@@ -765,19 +1964,25 @@
       <div class="table-footer">
         <span class="footer-info" id="paginationInfo">Showing 0 records</span>
         <div class="pagination">
-          <button class="button" id="prevButton" type="button">← Previous</button>
-          <span class="page-number" id="pageInfo">Page 1 of 1</span>
-          <button class="button" id="nextButton" type="button">Next →</button>
+          <button class="button" id="prevButton" type="button" aria-label="Previous page">‹</button>
+          <span class="page-number" id="pageInfo">1</span>
+          <button class="button" id="nextButton" type="button" aria-label="Next page">›</button>
         </div>
       </div>
     </section>
 
-    <p class="footer-note">
-      SafeGuard Emergency Monitoring · All timestamps are displayed in IST.<br>
-      For monitoring purposes only. This dashboard does not replace emergency response services.
-    </p>
-
-  </main>
+    <footer class="bottom-bar">
+      <div class="bottom-brand">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 21 5v7c0 5.5-3.7 8.6-9 10-5.3-1.4-9-4.5-9-10V5l9-3Z"/><path d="m8 12 2.5 2.5L16 9"/></svg>
+        SafeGuard AI
+      </div>
+      <span class="bottom-separator"></span>
+      <span>Industrial Safety Monitoring Platform</span>
+      <span class="bottom-tagline">Smarter Monitoring. Safer Tomorrow.</span>
+      <svg class="bottom-pulse" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 13h4l3-7 4 13 3-8 2 2h4"/></svg>
+    </footer>
+    </main>
+  </div>
 
   <script>
     // Replace these with your Supabase project details.
@@ -825,6 +2030,13 @@
     function setConnection(status, text) {
       $("connectionDot").className = "dot " + status;
       $("connectionText").textContent = text;
+      $("sidebarStatusDot").className = "dot " + status;
+      $("sidebarStatus").textContent =
+        status === "online" ? "System Online" :
+        status === "offline" ? "System Offline" : "Connecting...";
+      $("sidebarStatusDetail").textContent =
+        status === "online" ? "All services running smoothly" :
+        status === "offline" ? "Check connection details" : "Checking services...";
     }
 
     function formatDate(value) {
@@ -951,15 +2163,15 @@ function formatLocation(event) {
 
       $("totalCount").textContent = events.length.toLocaleString("en-IN");
       $("activeCount").textContent = events.filter(
-        (event) => event.status === "active"
+        (event) => String(event.status || "").toLowerCase() === "active"
       ).length.toLocaleString("en-IN");
 
       $("resolvedCount").textContent = events.filter(
-        (event) => event.status === "resolved"
+        (event) => String(event.status || "").toLowerCase() === "resolved"
       ).length.toLocaleString("en-IN");
 
       $("cameraCount").textContent = events.filter(
-        (event) => event.source === "camera"
+        (event) => String(event.source || "").toLowerCase() === "camera"
       ).length.toLocaleString("en-IN");
     }
 
@@ -981,8 +2193,8 @@ function formatLocation(event) {
         ].some((value) => String(value ?? "").toLowerCase().includes(query));
 
         return matchesQuery &&
-          (!source || event.source === source) &&
-          (!status || event.status === status);
+          (!source || String(event.source || "").toLowerCase() === source) &&
+          (!status || String(event.status || "").toLowerCase() === status);
       });
 
       state.filteredEvents.sort((a, b) => {
@@ -1044,7 +2256,8 @@ function formatLocation(event) {
         ? "Showing 0 records"
         : `Showing ${start + 1}–${Math.min(start + PAGE_SIZE, total)} of ${total}`;
 
-      $("pageInfo").textContent = `Page ${state.page} of ${pages}`;
+      $("pageInfo").textContent = String(state.page);
+      $("pageInfo").setAttribute("aria-label", `Page ${state.page} of ${pages}`);
       $("prevButton").disabled = state.page <= 1;
       $("nextButton").disabled = state.page >= pages;
     }
@@ -1155,6 +2368,71 @@ function formatLocation(event) {
       $("statusFilter").value = "";
       state.page = 1;
       applyFilters();
+    });
+
+    const views = {
+      dashboard: {
+        prefix: "Emergency",
+        accent: "Events",
+        description: "Monitor and review emergency records from your database.",
+        recordTitle: "Event Records",
+        source: "",
+        status: ""
+      },
+      camera: {
+        prefix: "Camera Monitoring",
+        accent: "Events",
+        description: "Review emergency events detected by camera monitoring.",
+        recordTitle: "Camera Events",
+        source: "camera",
+        status: ""
+      },
+      alerts: {
+        prefix: "Alert",
+        accent: "History",
+        description: "Review resolved emergency alerts from your database.",
+        recordTitle: "Alert History",
+        source: "",
+        status: "resolved"
+      },
+      esp32: {
+        prefix: "ESP32",
+        accent: "Device",
+        description: "Review emergency events associated with ESP32 devices.",
+        recordTitle: "ESP32 Events",
+        source: "esp32",
+        status: ""
+      },
+    };
+
+    function showView(name) {
+      const view = views[name];
+      if (!view) return;
+
+      $("heroTitlePrefix").textContent = view.prefix;
+      $("heroTitleAccent").textContent = view.accent;
+      $("heroDescription").textContent = view.description;
+      $("recordsTitle").textContent = view.recordTitle;
+      $("searchInput").value = "";
+      $("sourceFilter").value = view.source;
+      $("statusFilter").value = view.status;
+      state.page = 1;
+
+      document.querySelectorAll(".nav-item").forEach((item) => {
+        const selected = item.dataset.view === name;
+        item.classList.toggle("active", selected);
+        if (selected) item.setAttribute("aria-current", "page");
+        else item.removeAttribute("aria-current");
+      });
+
+      applyFilters();
+    }
+
+    document.querySelectorAll("[data-view]").forEach((item) => {
+      item.addEventListener("click", (event) => {
+        event.preventDefault();
+        showView(item.dataset.view);
+      });
     });
 
     $("prevButton").addEventListener("click", () => {
