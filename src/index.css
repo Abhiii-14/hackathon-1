@@ -1,0 +1,36 @@
+:root {
+  font-family: 'Inter', sans-serif;
+  color: #eaf2ff;
+  background: #080d19;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --bg: #080d19;
+  --surface: #111e30;
+  --surface-hover: #192b41;
+  --border: #293e59;
+  --cyan: #67e8f9;
+  --muted: #91a7c4;
+  --green: #34d399;
+  --red: #fb7185;
+  --transition: 220ms ease;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(ellipse at 80% 0%, #153653 0%, transparent 40%),
+    #080d19;
+}
+
+#root {
+  min-height: 100vh;
+}
