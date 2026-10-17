@@ -2,9 +2,12 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import {
   ShieldCheck, Flame, Camera, Bell, Cpu,
-  MessageSquare, Activity, RotateCcw, Wifi
+  MessageSquare, Activity, RotateCcw, Wifi, Menu, X
 } from "lucide-react";
 import CameraFeed from "./CameraFeed";
+import boardImage from "./assets/esp32-devkit.png";
+import dashboardHeroImage from "./assets/dashboard-hero.png";
+import statusChipImage from "./assets/status-chip.png";
 import {
   createEmergencyEvent,
   getEmergencyEvents,
@@ -41,6 +44,7 @@ export default function App() {
     isSupabaseConfigured ? "" : "Add your Supabase project URL and anon key in src/lib/supabase.js."
   );
   const [actionBusy, setActionBusy] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const actionBusyRef = useRef(false);
   const locationRequestId = useRef(0);
   const locationWatchId = useRef(null);
@@ -354,9 +358,18 @@ export default function App() {
           <ShieldCheck size={30} />
           <span>SafeGuard <b>AI</b></span>
         </div>
+        <button
+          className="mobile-nav-toggle"
+          type="button"
+          aria-label={mobileNavOpen ? "Close navigation" : "Open navigation"}
+          aria-expanded={mobileNavOpen}
+          onClick={() => setMobileNavOpen(open => !open)}
+        >
+          {mobileNavOpen ? <X size={21} /> : <Menu size={21} />}
+        </button>
 
-        <p className="side-label">MONITORING SYSTEM</p>
-        <nav>
+        <p className={`side-label ${mobileNavOpen ? "is-visible" : ""}`}>MONITORING SYSTEM</p>
+        <nav className={mobileNavOpen ? "is-open" : ""}>
           <div className="nav-active"><Activity size={19}/> Dashboard</div>
           <div><Camera size={19}/> Camera Monitoring</div>
           <div><Bell size={19}/> Alert History</div>
@@ -371,17 +384,6 @@ export default function App() {
       </aside>
 
       <main className="main">
-        <header className="header">
-          <div>
-            <p className="eyebrow">INDUSTRIAL SAFETY PLATFORM</p>
-            <h1>Safety Overview</h1>
-            <p className="muted">Real-time emergency monitoring dashboard</p>
-          </div>
-          <div className="header-pill">
-            <Wifi size={17}/> {dashboardConnectionLabel}
-          </div>
-        </header>
-
         {backendError && (
           <div className="backend-alert" role="alert">
             <strong>Data service issue</strong>
@@ -390,33 +392,80 @@ export default function App() {
         )}
 
         <motion.section
-          className={`hero ${emergency ? "danger" : "safe"}`}
-          animate={{ scale: [0.99, 1] }}
-          transition={{ duration: 0.4 }}
+          className="hero-shell"
+          id="dashboard"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
         >
-          <div className="hero-icon">
-            {emergency ? <Flame size={34}/> : <ShieldCheck size={34}/>}
+          <div className="hero-copy">
+            <p className="eyebrow">INDUSTRIAL SAFETY PLATFORM</p>
+            <h1>
+              Safety <span>Overview</span>
+            </h1>
+            <p className="muted">Real-time emergency monitoring dashboard</p>
           </div>
-          <div className="hero-content">
+
+          <div className="hero-scene">
+            <img className="hero-scene-art desktop-scene" src={dashboardHeroImage} alt="" />
+            <img className="hero-mobile-board" src={boardImage} alt="" />
+            <div className={`supabase-pill ${backendStatus === "ready" ? "connected" : "disconnected"}`}>
+              <Wifi size={15} />
+              {dashboardConnectionLabel}
+            </div>
+            <div className="hero-device-card">
+              <span className="device-icon"><Cpu size={21} /></span>
+              <div className="device-copy">
+                <strong>ESP32 DEVKIT</strong>
+                <span>THE HEART OF IDEAS</span>
+              </div>
+              <span className="device-arrow" aria-hidden="true">›</span>
+              <div className="device-tags">
+                <span>IoT</span>
+                <span>Embedded</span>
+                <span>Creative Tech</span>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+
+        <motion.section
+          className={`status-banner ${emergency ? "danger" : backendStatus === "ready" ? "safe" : "pending"}`}
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.08 }}
+        >
+          <div className="status-chip">
+            <img src={statusChipImage} alt="" className="status-chip-image" />
+          </div>
+
+          <div className="status-copy">
             <p>SYSTEM STATUS</p>
-            <h2>{emergency ? "EMERGENCY DETECTED" : "SYSTEM SAFE"}</h2>
+            <h2>
+              {backendStatus !== "ready"
+                ? "SYSTEM SYNCING"
+                : emergency ? "EMERGENCY ACTIVE" : <>SYSTEM <em>SAFE</em></>}
+            </h2>
             <span>
-              {emergency
-                ? "Emergency is active and recorded in Supabase"
-                : "No active emergency"}
+              {backendStatus !== "ready"
+                ? "Waiting for the current emergency status from Supabase"
+                : emergency ? "Emergency is active and recorded in Supabase" : "No active emergency"}
             </span>
           </div>
-          <span className="status-pill">
-            <span className="pulse-dot"></span>
-            {emergency ? "EMERGENCY" : "SAFE"}
-          </span>
+
+          <div className="status-summary">
+            <span className={`status-badge ${emergency ? "is-emergency" : backendStatus !== "ready" ? "is-pending" : ""}`}>
+              <span className="status-dot" />
+              {backendStatus !== "ready" ? "SYNCING" : emergency ? "EMERGENCY" : "SAFE"}
+            </span>
+          </div>
         </motion.section>
 
         <section className="stats">
           <motion.div className="stat-card" whileHover={{ y: -5 }}>
             <Camera size={23}/>
             <p>Camera Status</p>
-            <h3>{cameraStatus === "live" ? "Camera Online" : cameraStatus === "requesting" ? "Camera Connecting" : cameraStatus === "error" ? "Camera Unavailable" : "Camera Offline"}</h3>
+            <h3>{cameraStatus === "live" ? "Camera Online" : cameraStatus === "requesting" ? "Connecting..." : "Camera Offline"}</h3>
             <small>
               {cameraStatus === "live" ? "Browser feed active" : cameraStatus === "error"
                 ? "Check permissions or camera connection"
@@ -441,21 +490,25 @@ export default function App() {
           <motion.div className="stat-card" whileHover={{ y: -5 }}>
             <Bell size={23}/>
             <p>Stored Emergencies</p>
-            <h3>{events.length}</h3>
-            <small>Recent Supabase records</small>
+            <h3>{backendStatus === "ready" ? events.length : "—"}</h3>
+            <small>{backendStatus === "ready" ? "Recent Supabase records" : dashboardConnectionLabel}</small>
           </motion.div>
         </section>
 
         <section className="content-grid">
-          <CameraFeed
-            onStatusChange={setCameraStatus}
-            onFireDetected={() => triggerAlert("camera")}
-          />
+          <div id="camera-monitoring">
+            <CameraFeed
+              onStatusChange={setCameraStatus}
+              onFireDetected={() => triggerAlert("camera")}
+            />
+          </div>
 
-          <div className="panel">
+          <div className="panel emergency-control" id="emergency-control">
             <div className="panel-heading">
               <h3><Bell size={20}/> Emergency Control</h3>
-              <span className="tag">SUPABASE LOGGED</span>
+              <span className={`tag backend-tag ${backendStatus === "ready" ? "is-ready" : ""}`}>
+                {backendStatus === "ready" ? "SUPABASE LOGGED" : dashboardConnectionLabel.toUpperCase()}
+              </span>
             </div>
             <p className="muted control-text">
               Create a persistent emergency record, request this browser's location, and save the result to Supabase.
@@ -480,6 +533,7 @@ export default function App() {
           </div>
         </section>
 
+        <div id="location-map">
         <Suspense fallback={<section className="panel map-loading">Loading interactive location map...</section>}>
           <LocationMap
             emergency={emergency}
@@ -490,8 +544,9 @@ export default function App() {
             locationError={locationError}
           />
         </Suspense>
+        </div>
 
-        <section className="panel history">
+        <section className="panel history" id="alert-history">
           <div className="panel-heading">
             <h3><Activity size={20}/> Recent Activity</h3>
             <span className="tag">SUPABASE</span>

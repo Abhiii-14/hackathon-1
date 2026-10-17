@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Camera, CircleStop, LoaderCircle, RefreshCw, Video } from "lucide-react";
+import { Camera, CameraOff, CircleStop, LoaderCircle, RefreshCw } from "lucide-react";
 import { FIRE_API_URL } from "./lib/fireApi";
 import "./CameraFeed.css";
 
@@ -40,6 +40,7 @@ export default function CameraFeed({
 }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const cameraToolsRef = useRef(null);
   const streamRef = useRef(null);
   const requestIdRef = useRef(0);
   const selectedDeviceIdRef = useRef("");
@@ -312,6 +313,10 @@ export default function CameraFeed({
   }, [refreshDevices]);
 
   function stopCamera() {
+    if (cameraToolsRef.current) {
+      cameraToolsRef.current.open = false;
+    }
+
     requestIdRef.current += 1;
     const activeStream = streamRef.current;
     streamRef.current = null;
@@ -334,13 +339,94 @@ export default function CameraFeed({
     <section className="panel camera-monitor-panel" aria-labelledby="camera-monitor-title">
       <div className="panel-heading">
         <h3 id="camera-monitor-title"><Camera size={20}/> Live Camera Monitoring</h3>
-        <span className={`tag camera-status-tag ${status}`}>
-          <span className="camera-status-dot" />
-          {status === "live" ? "CAMERA ONLINE" : status === "requesting" ? "CONNECTING" : status === "error" ? "CAMERA ISSUE" : "CAMERA OFFLINE"}
-        </span>
+        <details ref={cameraToolsRef} className="camera-tools">
+          <summary className={`tag camera-status-tag ${status}`}>
+            <span className="camera-status-dot" />
+            {status === "live" ? "CAMERA ONLINE" : status === "requesting" ? "CONNECTING" : status === "error" ? "CAMERA ISSUE" : "CAMERA OFFLINE"}
+          </summary>
+          <div className="camera-tools-popover">
+            <div className={`camera-ai-status ${aiStatus}`} role="status" aria-live="polite">
+              <div className="camera-ai-heading">
+                <strong>
+                  {aiStatus === "checking" ? "Checking AI Model..."
+                    : aiStatus === "ready" ? "AI Fire Detection Active"
+                      : aiStatus === "connected_no_model" ? "Backend Connected · AI Model Not Loaded"
+                        : aiStatus === "offline" ? "AI Backend Offline" : "AI Detection Error"}
+                </strong>
+                {aiStatus === "checking" && <LoaderCircle size={14} className="camera-spinner" />}
+              </div>
+              <span>{aiMessage}</span>
+              {aiStatus === "ready" && (
+                <>
+                  <span>
+                    Auto-alert threshold: fire in {FIRE_FRAMES_REQUIRED} of {FIRE_FRAME_WINDOW} sampled frames.
+                  </span>
+                  {cooldownUntil > clock && (
+                    <span>Automatic alert cooldown: {Math.ceil((cooldownUntil - clock) / 1000)}s</span>
+                  )}
+                  <div className="camera-predictions" aria-label="Current model predictions">
+                    {predictions.length
+                      ? predictions.map((prediction, index) => (
+                        <span
+                          key={`${prediction.label}-${index}`}
+                          className={prediction.is_fire ? "is-fire" : prediction.is_smoke ? "is-smoke" : ""}
+                        >
+                          {prediction.label} {(prediction.confidence * 100).toFixed(1)}%
+                        </span>
+                      ))
+                      : <span>No detections above the configured confidence threshold.</span>}
+                  </div>
+                  {smokeWarning && (
+                    <strong className="camera-smoke-warning">
+                      Smoke detected — verify the area. Smoke alone will not automatically trigger an emergency.
+                    </strong>
+                  )}
+                </>
+              )}
+            </div>
+
+            <div className="camera-controls">
+              <label className="camera-device-picker">
+                <span>CAMERA DEVICE</span>
+                <select
+                  value={selectedDeviceId}
+                  onChange={changeCamera}
+                  disabled={status === "requesting" || (devices.length === 0 && !stream)}
+                  aria-label="Select camera device"
+                >
+                  {devices.length === 0 && <option value="">Default camera</option>}
+                  {devices.map((device, index) => (
+                    <option key={device.deviceId || index} value={device.deviceId}>
+                      {device.label || `Camera ${index + 1}`}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {stream ? (
+                <button className="camera-action-button stop" type="button" onClick={stopCamera}>
+                  <CircleStop size={17} /> Stop Camera
+                </button>
+              ) : (
+                <button
+                  className="camera-action-button start"
+                  type="button"
+                  onClick={() => startCamera(selectedDeviceId)}
+                  disabled={status === "requesting"}
+                >
+                  {status === "error" ? <RefreshCw size={17} /> : <Camera size={17} />}
+                  {status === "requesting" ? "Connecting..." : status === "error" ? "Retry Camera" : "Start Camera"}
+                </button>
+              )}
+            </div>
+
+            <p className="camera-disclaimer">
+              Detection uses selected frames from this live preview. AI results are advisory and must be independently verified.
+            </p>
+          </div>
+        </details>
       </div>
 
-      <div className={`camera-preview ${stream ? "has-stream" : ""}`}>
+      <div className={`camera-preview ${stream ? "has-stream" : ""} ${status}`}>
         <video
           ref={videoRef}
           className="camera-video"
@@ -352,6 +438,9 @@ export default function CameraFeed({
             if (streamRef.current === stream) {
               setVideoReady(true);
               setStatus("live");
+              if (cameraToolsRef.current) {
+                cameraToolsRef.current.open = false;
+              }
             }
           }}
         />
@@ -372,93 +461,22 @@ export default function CameraFeed({
         ))}
         {(!stream || !videoReady) && (
           <div className="camera-empty-state">
-            {status === "requesting" ? <LoaderCircle size={42} className="camera-spinner" /> : <Video size={46} />}
-            <h4>{status === "requesting" ? "Connecting to camera..." : "Camera preview is off"}</h4>
-            <p>Start the camera to preview this device's live video feed.</p>
+            {status === "requesting"
+              ? <LoaderCircle size={42} className="camera-spinner" />
+              : <CameraOff size={42} />}
+            <h4>{status === "requesting" ? "Connecting to camera..." : "Camera is offline"}</h4>
+            <p>
+              {status === "requesting"
+                ? "Waiting for camera permission and a live video stream."
+                : "The live feed will appear here once the camera is connected."}
+            </p>
           </div>
         )}
         {stream && videoReady && <span className="camera-live-indicator"><span /> LIVE PREVIEW</span>}
       </div>
 
-      <div className={`camera-ai-status ${aiStatus}`} role="status" aria-live="polite">
-        <div className="camera-ai-heading">
-          <strong>
-            {aiStatus === "checking" ? "Checking AI Model..."
-              : aiStatus === "ready" ? "AI Fire Detection Active"
-                : aiStatus === "connected_no_model" ? "Backend Connected · AI Model Not Loaded"
-                  : aiStatus === "offline" ? "AI Backend Offline" : "AI Detection Error"}
-          </strong>
-          {aiStatus === "checking" && <LoaderCircle size={14} className="camera-spinner" />}
-        </div>
-        <span>{aiMessage}</span>
-        {aiStatus === "ready" && (
-          <>
-            <span>
-              Auto-alert threshold: fire in {FIRE_FRAMES_REQUIRED} of {FIRE_FRAME_WINDOW} sampled frames.
-            </span>
-            {cooldownUntil > clock && (
-              <span>Automatic alert cooldown: {Math.ceil((cooldownUntil - clock) / 1000)}s</span>
-            )}
-            <div className="camera-predictions" aria-label="Current model predictions">
-              {predictions.length
-                ? predictions.map((prediction, index) => (
-                    <span
-                      key={`${prediction.label}-${index}`}
-                      className={prediction.is_fire ? "is-fire" : prediction.is_smoke ? "is-smoke" : ""}
-                    >
-                      {prediction.label} {(prediction.confidence * 100).toFixed(1)}%
-                    </span>
-                  ))
-                  : <span>No detections above the configured confidence threshold.</span>}
-              </div>
-              {smokeWarning && (
-                <strong className="camera-smoke-warning">
-                  Smoke detected — verify the area. Smoke alone will not automatically trigger an emergency.
-                </strong>
-              )}
-          </>
-        )}
-      </div>
-
       {error && <p className="camera-error" role="alert">{error}</p>}
 
-      <div className="camera-controls">
-        <label className="camera-device-picker">
-          <span>CAMERA DEVICE</span>
-          <select
-            value={selectedDeviceId}
-            onChange={changeCamera}
-            disabled={status === "requesting" || (devices.length === 0 && !stream)}
-            aria-label="Select camera device"
-          >
-            {devices.length === 0 && <option value="">Default camera</option>}
-            {devices.map((device, index) => (
-              <option key={device.deviceId || index} value={device.deviceId}>
-                {device.label || `Camera ${index + 1}`}
-              </option>
-            ))}
-          </select>
-        </label>
-        {stream ? (
-          <button className="camera-action-button stop" type="button" onClick={stopCamera}>
-            <CircleStop size={17} /> Stop Camera
-          </button>
-        ) : (
-          <button
-            className="camera-action-button start"
-            type="button"
-            onClick={() => startCamera(selectedDeviceId)}
-            disabled={status === "requesting"}
-          >
-            {status === "error" ? <RefreshCw size={17} /> : <Camera size={17} />}
-            {status === "requesting" ? "Connecting..." : status === "error" ? "Retry Camera" : "Start Camera"}
-          </button>
-        )}
-      </div>
-
-      <p className="camera-disclaimer">
-        Detection uses selected frames from this live preview. AI results are advisory and must be independently verified.
-      </p>
     </section>
   );
 }

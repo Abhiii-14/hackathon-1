@@ -353,3 +353,97 @@
     animation-iteration-count: 1 !important;
   }
 }
+
+.emergency-map-panel.is-safe {
+  border-color: rgba(255, 31, 61, 0.46);
+  box-shadow: 0 0 24px rgba(255, 31, 61, 0.16);
+}
+
+.emergency-map-panel.is-emergency {
+  border-color: rgba(255, 31, 61, 0.8);
+  box-shadow: 0 0 30px rgba(255, 31, 61, 0.35);
+}
+
+.emergency-map-heading h3 svg,
+.map-overlay-label svg {
+  color: #ff435d;
+}
+
+.map-eyebrow,
+.map-detail-label {
+  color: #b48a94;
+  letter-spacing: 0.18em;
+}
+
+.map-status-badge.is-safe {
+  color: #22e08a;
+  border-color: rgba(34, 224, 138, 0.5);
+  background: rgba(9, 30, 21, 0.56);
+}
+
+.emergency-map-frame {
+  border-color: rgba(255, 31, 61, 0.4);
+  background: #100409;
+}
+
+.emergency-leaflet-map,
+.emergency-leaflet-map .leaflet-container {
+  background: #100409;
+}
+
+.emergency-leaflet-map .leaflet-tile {
+  filter: invert(0.88) hue-rotate(180deg) brightness(0.72) saturate(0.6) contrast(1.05);
+}
+
+.emergency-leaflet-map .leaflet-control-zoom {
+  border-color: rgba(255, 31, 61, 0.46);
+}
+
+.emergency-leaflet-map .leaflet-control-zoom a {
+  background: rgba(15, 7, 10, 0.96);
+  color: #f3e7ea;
+}
+
+.emergency-leaflet-map .leaflet-control-zoom a:hover {
+  background: rgba(49, 8, 17, 0.96);
+  color: #ff6b80;
+}
+
+.emergency-leaflet-map .leaflet-control-attribution {
+  border-color: rgba(255, 31, 61, 0.35);
+  background: rgba(11, 5, 8, 0.92);
+  color: #c5afb5;
+}
+
+.emergency-leaflet-map .leaflet-control-attribution a {
+  color: #ff8293;
+}
+
+.map-info-note,
+.map-location-feedback {
+  color: #b9a3a8;
+}
+
+.map-overlay-label,
+.map-no-location {
+  border-color: rgba(255, 31, 61, 0.32);
+  background: rgba(12, 5, 8, 0.9);
+  color: #f3e7ea;
+}
+
+.map-location-label,
+.map-factory-details strong,
+.map-event-details strong {
+  color: #d6c2c7;
+}
+
+.google-maps-link {
+  border-color: rgba(255, 31, 61, 0.5);
+  background: rgba(34, 7, 14, 0.86);
+  color: #ff8293;
+}
+
+.google-maps-link:hover {
+  background: rgba(56, 8, 19, 0.92);
+  box-shadow: 0 0 18px rgba(255, 31, 61, 0.2);
+}
