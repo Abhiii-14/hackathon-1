@@ -5,8 +5,7 @@ import "./CameraFeed.css";
 
 const FRAME_INTERVAL_MS = 700;
 const FIRE_FRAMES_REQUIRED = 3;
-const FIRE_FRAME_WINDOW = 5;
-const FIRE_ALERT_COOLDOWN_MS = 60_000;
+const FIRE_CLEAR_FRAMES_REQUIRED = 5;
 
 function getCameraErrorMessage(error) {
   switch (error.name) {
@@ -36,7 +35,8 @@ function stopMediaStream(stream) {
 
 export default function CameraFeed({
   onStatusChange,
-  onFireDetected
+  onFireDetected,
+  emergencyActive
 }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -45,8 +45,10 @@ export default function CameraFeed({
   const requestIdRef = useRef(0);
   const selectedDeviceIdRef = useRef("");
   const onFireDetectedRef = useRef(onFireDetected);
-  const fireFrameHistory = useRef([]);
-  const lastAutomaticAlertAt = useRef(0);
+  const fireFrameStreak = useRef(0);
+  const fireAlertLatched = useRef(false);
+  const clearFrameStreak = useRef(0);
+  const previousEmergencyActive = useRef(emergencyActive);
   const [stream, setStream] = useState(null);
   const [devices, setDevices] = useState([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState("");
@@ -57,8 +59,7 @@ export default function CameraFeed({
   const [aiMessage, setAiMessage] = useState("Checking fire-detection backend...");
   const [predictions, setPredictions] = useState([]);
   const [smokeWarning, setSmokeWarning] = useState(false);
-  const [cooldownUntil, setCooldownUntil] = useState(0);
-  const [clock, setClock] = useState(0);
+  const [alertAwaitingClear, setAlertAwaitingClear] = useState(false);
 
   useEffect(() => {
     onStatusChange(status);
@@ -67,6 +68,16 @@ export default function CameraFeed({
   useEffect(() => {
     onFireDetectedRef.current = onFireDetected;
   }, [onFireDetected]);
+
+  useEffect(() => {
+    if (previousEmergencyActive.current && !emergencyActive) {
+      fireAlertLatched.current = true;
+      fireFrameStreak.current = 0;
+      clearFrameStreak.current = 0;
+      setAlertAwaitingClear(true);
+    }
+    previousEmergencyActive.current = emergencyActive;
+  }, [emergencyActive]);
 
   useEffect(() => {
     let active = true;
@@ -106,12 +117,6 @@ export default function CameraFeed({
       window.clearTimeout(timeoutId);
     };
   }, []);
-
-  useEffect(() => {
-    if (!cooldownUntil) return undefined;
-    const intervalId = window.setInterval(() => setClock(Date.now()), 1000);
-    return () => window.clearInterval(intervalId);
-  }, [cooldownUntil]);
 
   useEffect(() => {
     if (!videoReady || aiStatus !== "ready") return undefined;
@@ -156,18 +161,26 @@ export default function CameraFeed({
 
         setPredictions(result.detections);
         setSmokeWarning(Boolean(result.smoke_detected));
-        fireFrameHistory.current = [
-          ...fireFrameHistory.current,
-          Boolean(result.fire_detected)
-        ].slice(-FIRE_FRAME_WINDOW);
-        const positiveFrames = fireFrameHistory.current.filter(Boolean).length;
-        const now = Date.now();
-        if (positiveFrames >= FIRE_FRAMES_REQUIRED &&
-            now - lastAutomaticAlertAt.current >= FIRE_ALERT_COOLDOWN_MS) {
-          lastAutomaticAlertAt.current = now;
-          setCooldownUntil(now + FIRE_ALERT_COOLDOWN_MS);
-          setClock(now);
-          await onFireDetectedRef.current?.();
+        const fireDetected = Boolean(result.fire_detected);
+        if (fireAlertLatched.current) {
+          clearFrameStreak.current = fireDetected ? 0 : clearFrameStreak.current + 1;
+          if (clearFrameStreak.current >= FIRE_CLEAR_FRAMES_REQUIRED) {
+            fireAlertLatched.current = false;
+            clearFrameStreak.current = 0;
+            fireFrameStreak.current = 0;
+            setAlertAwaitingClear(false);
+          }
+        } else {
+          fireFrameStreak.current = fireDetected ? fireFrameStreak.current + 1 : 0;
+          if (fireFrameStreak.current >= FIRE_FRAMES_REQUIRED) {
+            const activated = await onFireDetectedRef.current?.();
+            if (!active) return;
+            if (activated !== false) {
+              fireAlertLatched.current = true;
+              clearFrameStreak.current = 0;
+              setAlertAwaitingClear(true);
+            }
+          }
         }
       } catch (detectionError) {
         if (!active) return;
@@ -184,7 +197,7 @@ export default function CameraFeed({
     return () => {
       active = false;
       window.clearTimeout(timeoutId);
-      fireFrameHistory.current = [];
+      fireFrameStreak.current = 0;
       setPredictions([]);
     };
   }, [aiStatus, videoReady]);
@@ -359,10 +372,12 @@ export default function CameraFeed({
               {aiStatus === "ready" && (
                 <>
                   <span>
-                    Auto-alert threshold: fire in {FIRE_FRAMES_REQUIRED} of {FIRE_FRAME_WINDOW} sampled frames.
+                    Auto-alert threshold: fire in {FIRE_FRAMES_REQUIRED} consecutive sampled frames.
                   </span>
-                  {cooldownUntil > clock && (
-                    <span>Automatic alert cooldown: {Math.ceil((cooldownUntil - clock) / 1000)}s</span>
+                  {alertAwaitingClear && (
+                    <span>
+                      Alert is latched. Fire must be absent for {FIRE_CLEAR_FRAMES_REQUIRED} consecutive sampled frames before a new alert can trigger.
+                    </span>
                   )}
                   <div className="camera-predictions" aria-label="Current model predictions">
                     {predictions.length
