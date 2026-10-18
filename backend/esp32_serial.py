@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 import threading
 import uuid
 from collections import OrderedDict
@@ -25,6 +26,7 @@ class _PendingCommand:
     request_id: str
     target: str
     completed: threading.Event = field(default_factory=threading.Event)
+    last_observed_line: str | None = None
     result: dict[str, Any] | None = None
     error: str | None = None
     error_status: int = 502
@@ -241,7 +243,7 @@ class Esp32SerialListener:
         with self._lock:
             if pending.completed.is_set():
                 return
-            if status_code in {503, 504}:
+            if status_code == 503:
                 self._state_known = False
             pending.error = message
             pending.error_status = status_code
@@ -269,13 +271,52 @@ class Esp32SerialListener:
         logger.info("ESP32 reported system state: %s", event)
 
     def _process_line(self, line: str) -> None:
-        message = line.strip()
-        fields = message.split(",")
-        if len(fields) == 3 and fields[0] == "ACK":
-            self._process_ack(fields[1], fields[2])
+        message = line.strip().lstrip("\ufeff")
+        fields = [field for field in re.split(r"[,:;\s]+", message) if field]
+        command_type = fields[0].upper() if fields else ""
+        with self._lock:
+            pending = self._pending_command
+            is_new_pending_line = pending is not None and pending.last_observed_line != message
+            if pending is not None:
+                pending.last_observed_line = message
+        if pending is not None and is_new_pending_line:
+            logger.warning("ESP32 response while %s is pending: %r", pending.target, message)
+        if command_type == "ACK":
+            if pending is None:
+                logger.warning("Ignoring unmatched ESP32 acknowledgement: %r", message)
+                return
+            if len(fields) == 1:
+                self._process_ack(pending.request_id, None)
+                return
+            if len(fields) == 2 and fields[1].upper() in {
+                "EMERGENCY",
+                "SAFE",
+                "OK",
+                "SUCCESS",
+                "1",
+            }:
+                self._process_ack(pending.request_id, fields[1].upper())
+                return
+            if len(fields) in {2, 3}:
+                acknowledged_state = fields[2].upper() if len(fields) == 3 else None
+                self._process_ack(fields[1], acknowledged_state)
+                return
+            logger.warning("Ignoring malformed ESP32 acknowledgement: %r", message)
             return
-        if len(fields) == 3 and fields[0] == "NACK":
-            self._process_nack(fields[1], fields[2])
+        if command_type in {"NACK", "NAK"}:
+            if pending is None:
+                logger.warning("Ignoring unmatched ESP32 negative acknowledgement: %r", message)
+                return
+            if len(fields) == 1:
+                self._process_nack(pending.request_id, "rejected")
+                return
+            if len(fields) >= 3:
+                self._process_nack(fields[1], " ".join(fields[2:]).strip() or "rejected")
+                return
+            if fields[1] == pending.request_id:
+                self._process_nack(fields[1], "rejected")
+            else:
+                self._process_nack(pending.request_id, fields[1])
             return
 
         legacy_message = message.upper()
@@ -286,7 +327,11 @@ class Esp32SerialListener:
         elif "SYSTEM SAFE" in legacy_message:
             self._set_emergency_state(False, "safe")
 
-    def _process_ack(self, request_id: str, acknowledged_state: str) -> None:
+    def _process_ack(
+        self,
+        request_id: str,
+        acknowledged_state: str | None,
+    ) -> None:
         with self._lock:
             pending = self._pending_command
             if pending is None or pending.request_id != request_id:
@@ -295,6 +340,10 @@ class Esp32SerialListener:
             if pending.completed.is_set():
                 return
             expected_state = "EMERGENCY" if pending.target == "emergency" else "SAFE"
+            if acknowledged_state in {None, "", "OK"}:
+                acknowledged_state = expected_state
+            elif acknowledged_state in {"SUCCESS", "1"}:
+                acknowledged_state = expected_state
             if acknowledged_state != expected_state:
                 active = acknowledged_state == "EMERGENCY"
                 event = "emergency" if active else "reset"
@@ -382,9 +431,19 @@ class Esp32SerialListener:
             )
 
             try:
+                line_buffer = bytearray()
                 while not self._stop_event.is_set():
-                    line = connection.readline()
-                    if line:
+                    chunk = connection.readline()
+                    if not chunk:
+                        continue
+                    line_buffer.extend(chunk)
+                    if len(line_buffer) > 1024:
+                        logger.warning("Discarding oversized ESP32 serial line.")
+                        line_buffer.clear()
+                        continue
+                    while b"\n" in line_buffer:
+                        line, _, remainder = line_buffer.partition(b"\n")
+                        line_buffer = bytearray(remainder)
                         self._process_line(line.decode("utf-8", errors="replace"))
             except (serial.SerialException, OSError) as error:
                 if not self._stop_event.is_set():

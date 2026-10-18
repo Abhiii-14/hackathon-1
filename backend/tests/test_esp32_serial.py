@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import app
 from app import Esp32CommandRequest
-from esp32_serial import Esp32CommandError, Esp32SerialListener
+from esp32_serial import Esp32CommandError, Esp32SerialListener, _PendingCommand
 
 
 class Esp32SerialListenerTests(unittest.TestCase):
@@ -184,6 +184,53 @@ class Esp32SerialListenerTests(unittest.TestCase):
             self.assertEqual(fake_serial.writes, [b"CMD,req-reset,RESET\n"])
             listener.stop()
 
+    def test_bare_acknowledgement_uses_pending_command_target(self) -> None:
+        fake_serial = FakeSerial(ack_style="bare")
+        listener = Esp32SerialListener(command_timeout=0.5)
+        with patch("esp32_serial.serial.Serial", return_value=fake_serial):
+            listener.start()
+            self.assertTrue(wait_until(lambda: listener.snapshot()["connected"]))
+            result = listener.send_command("req-bare-ack", "emergency")
+
+            self.assertTrue(result["acknowledged"])
+            self.assertEqual(result["state"], "EMERGENCY")
+            listener.stop()
+
+    def test_acknowledgement_without_request_id_is_correlated_to_single_pending_command(self) -> None:
+        fake_serial = FakeSerial(ack_style="state_without_id")
+        listener = Esp32SerialListener(command_timeout=0.5)
+        with patch("esp32_serial.serial.Serial", return_value=fake_serial):
+            listener.start()
+            self.assertTrue(wait_until(lambda: listener.snapshot()["connected"]))
+            result = listener.send_command("req-ack-no-id", "reset")
+
+            self.assertTrue(result["acknowledged"])
+            self.assertEqual(result["state"], "SAFE")
+            listener.stop()
+
+    def test_generic_success_acknowledgement_uses_pending_command_state(self) -> None:
+        listener = Esp32SerialListener()
+        pending = _PendingCommand("req-generic", "emergency")
+        listener._pending_command = pending
+
+        listener._process_line("ACK,req-generic,OK")
+
+        self.assertTrue(pending.completed.is_set())
+        self.assertTrue(pending.result["acknowledged"])
+        self.assertEqual(pending.result["state"], "EMERGENCY")
+
+    def test_acknowledgement_is_case_insensitive_and_partial_lines_are_buffered(self) -> None:
+        fake_serial = FakeSerial(ack_style="fragmented")
+        listener = Esp32SerialListener(command_timeout=0.5)
+        with patch("esp32_serial.serial.Serial", return_value=fake_serial):
+            listener.start()
+            self.assertTrue(wait_until(lambda: listener.snapshot()["connected"]))
+            result = listener.send_command("req-fragmented-ack", "reset")
+
+            self.assertTrue(result["acknowledged"])
+            self.assertEqual(result["state"], "SAFE")
+            listener.stop()
+
     def test_timeout_does_not_report_success(self) -> None:
         fake_serial = FakeSerial(acknowledge=False, send_nack=False)
         listener = Esp32SerialListener(command_timeout=0.01)
@@ -227,10 +274,12 @@ class FakeSerial:
         self,
         acknowledge: bool = True,
         send_nack: bool = True,
+        ack_style: str = "state",
     ) -> None:
         self.is_open = True
         self.acknowledge = acknowledge
         self.send_nack = send_nack
+        self.ack_style = ack_style
         self.incoming: Queue[bytes] = Queue()
         self.writes: list[bytes] = []
 
@@ -239,7 +288,16 @@ class FakeSerial:
         _, request_id, target = command.decode("ascii").strip().split(",")
         if self.acknowledge:
             state = "EMERGENCY" if target == "EMERGENCY" else "SAFE"
-            self.incoming.put(f"ACK,{request_id},{state}\n".encode("ascii"))
+            if self.ack_style == "bare":
+                self.incoming.put(b"ACK\n")
+            elif self.ack_style == "state_without_id":
+                self.incoming.put(f"ACK,{state}\n".encode("ascii"))
+            elif self.ack_style == "fragmented":
+                response = f"ack,{request_id},{state}\r\n".encode("ascii")
+                self.incoming.put(response[:-1])
+                self.incoming.put(response[-1:])
+            else:
+                self.incoming.put(f"ACK,{request_id},{state}\n".encode("ascii"))
         elif self.send_nack:
             self.incoming.put(f"NACK,{request_id},TEST_REJECTED\n".encode("ascii"))
         return len(command)

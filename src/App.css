@@ -3411,17 +3411,17 @@ footer {
 .content-grid {
   grid-template-columns: minmax(0, 1.51fr) minmax(0, 1fr);
   gap: 15px;
-  height: 300px;
+  height: 330px;
   margin-top: 19px;
   align-items: stretch;
 }
 
 .content-grid > #camera-monitoring {
-  height: 300px;
+  height: 330px;
 }
 
 .content-grid > .emergency-control {
-  height: 300px;
+  height: 330px;
 }
 
 .panel {
@@ -3447,7 +3447,7 @@ footer {
 }
 
 .camera-monitor-panel {
-  height: 300px;
+  height: 330px;
   padding: 16px 17px 9px;
   overflow: visible;
 }
@@ -3467,7 +3467,7 @@ footer {
 }
 
 .camera-preview {
-  height: 235px;
+  height: 265px;
   min-height: 0;
   aspect-ratio: auto;
   border: 1px solid rgba(255, 31, 61, 0.55);
@@ -3643,7 +3643,7 @@ footer {
   }
 
   .camera-preview {
-    height: clamp(160px, 30vw, 240px);
+    height: clamp(180px, 32vw, 260px);
   }
 }
 
@@ -3807,7 +3807,7 @@ footer {
   }
 
   .camera-preview {
-    height: clamp(145px, 42vw, 220px);
+    height: clamp(160px, 44vw, 240px);
   }
 
   #location-map .emergency-map-panel {
