@@ -1,3 +1,8 @@
 Here is the public url for the SafeGuard Admin Page
 
-safeguard-esp32-admin.netlify.app
+https://safeguard-esp32-admin-dashboard.netlify.app/
+
+The admin page can be only accessed using the following username and password:
+
+Username: Admin
+Password: Ideonix123
