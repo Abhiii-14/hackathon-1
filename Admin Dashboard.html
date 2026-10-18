@@ -540,6 +540,86 @@
       display: none !important;
     }
 
+    .login-screen {
+      display: grid;
+      min-height: 100vh;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(ellipse at 50% 35%, rgba(143, 9, 24, .2), transparent 48%),
+        var(--page);
+    }
+
+    .login-card {
+      width: min(100%, 400px);
+      padding: 32px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: #080910;
+      box-shadow: var(--glow);
+    }
+
+    .login-card h1 {
+      margin-bottom: 8px;
+      font-size: 24px;
+    }
+
+    .login-card > p {
+      margin-bottom: 24px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .login-form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .login-form label {
+      display: grid;
+      gap: 7px;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .login-form input {
+      width: 100%;
+      min-height: 42px;
+      padding: 10px 12px;
+      border: 1px solid #303746;
+      border-radius: 8px;
+      background: var(--input-bg);
+      color: var(--input-text);
+    }
+
+    .login-form .button {
+      min-height: 42px;
+      margin-top: 4px;
+    }
+
+    .login-error {
+      min-height: 18px;
+      color: var(--error-text);
+      font-size: 12px;
+    }
+
+    .login-note {
+      display: block;
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    body:not(.authenticated) .app-shell {
+      display: none;
+    }
+
+    body.authenticated .login-screen {
+      display: none;
+    }
+
     @media (max-width: 900px) {
       .app {
         padding: 20px;
@@ -1759,6 +1839,26 @@
 </head>
 
 <body>
+  <section class="login-screen" aria-labelledby="loginTitle">
+    <div class="login-card">
+      <h1 id="loginTitle">Admin sign in</h1>
+      <p>Enter your administrator credentials to open the dashboard.</p>
+      <form class="login-form" id="loginForm">
+        <label for="loginUsername">
+          Username
+          <input id="loginUsername" name="username" type="text" autocomplete="username" required>
+        </label>
+        <label for="loginPassword">
+          Password
+          <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <button class="button primary" type="submit">Sign in</button>
+        <p class="login-error" id="loginError" role="alert" aria-live="polite"></p>
+      </form>
+      <small class="login-note">This JavaScript-only login is for basic access control. The credentials are stored in this page and are not secure against someone who can inspect its source.</small>
+    </div>
+  </section>
+
   <div class="app-shell">
     <aside class="sidebar">
       <a class="brand" href="#" aria-label="SafeGuard AI dashboard" data-view="dashboard">
@@ -1808,6 +1908,7 @@
             <span id="connectionText">Connecting...</span>
           </div>
           <button class="button primary" id="refreshButton" type="button">↻ &nbsp;Refresh</button>
+          <button class="button" id="logoutButton" type="button">Log out</button>
         </div>
         <div class="hero-copy">
           <p class="eyebrow">EMERGENCY MONITORING SYSTEM</p>
@@ -1837,12 +1938,6 @@
           <circle cx="131" cy="166" r="3" fill="#141820"/><circle cx="399" cy="156" r="3" fill="#141820"/>
           <path d="m160 153 22-4m152-86 25-4m-102 117 21-4" stroke="#44d5cb" stroke-width="2" opacity=".7"/>
         </svg>
-        <div class="device-card">
-          <div class="device-icon" aria-hidden="true"><svg viewBox="0 0 28 28"><rect x="6" y="6" width="16" height="16" rx="2"/><path d="M10 10h8v8h-8zM10 2v4m8-4v4m-8 16v4m8-4v4M2 10h4m-4 8h4m16-8h4m-4 8h4"/></svg></div>
-          <strong class="device-name">ESP32 DEVKIT</strong>
-          <span class="device-caption">THE HEART OF IDEAS</span>
-          <div class="device-tags"><span>IoT</span><span>Embedded</span><span>Creative Tech</span></div>
-        </div>
       </header>
 
     <section class="metrics" aria-label="Emergency event summary">
@@ -1985,14 +2080,16 @@
   </div>
 
   <script>
-    // Replace these with your Supabase project details.
-    // Use a publishable key or legacy anon key, never the service_role key.
+    const ADMIN_USERNAME = "Admin";
+    const ADMIN_PASSWORD = "Ideonix123";
+
     const SUPABASE_URL = "https://xrvnwzpttejnivxqigmz.supabase.co";
     const SUPABASE_KEY = "sb_publishable_BT69n1h0rfetfqAJ0Zii-w_taJnYfuc";
 
     const TABLE_NAME = "emergency_events";
     const PAGE_SIZE = 10;
     const REFRESH_INTERVAL = 30000;
+    let refreshTimer = null;
 
     const state = {
       client: null,
@@ -2500,8 +2597,37 @@ function formatLocation(event) {
       }
     });
 
-    fetchEvents();
-    setInterval(fetchEvents, REFRESH_INTERVAL);
+    $("loginForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const username = $("loginUsername").value;
+      const password = $("loginPassword").value;
+
+      if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
+        $("loginError").textContent = "Incorrect username or password.";
+        $("loginPassword").value = "";
+        $("loginPassword").focus();
+        return;
+      }
+
+      $("loginError").textContent = "";
+      $("loginPassword").value = "";
+      document.body.classList.add("authenticated");
+      fetchEvents();
+      if (refreshTimer === null) {
+        refreshTimer = setInterval(fetchEvents, REFRESH_INTERVAL);
+      }
+    });
+
+    $("logoutButton").addEventListener("click", () => {
+      document.body.classList.remove("authenticated");
+      $("loginForm").reset();
+      $("loginError").textContent = "";
+      $("loginUsername").focus();
+      if (refreshTimer !== null) {
+        clearInterval(refreshTimer);
+        refreshTimer = null;
+      }
+    });
   </script>
 </body>
 </html>
