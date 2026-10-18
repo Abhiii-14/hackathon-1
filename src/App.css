@@ -3273,6 +3273,8 @@ footer {
 
 .hero-scene {
   container-type: inline-size;
+  right: auto;
+  width: min(100%, 1073px);
 }
 
 .supabase-pill {
@@ -3737,6 +3739,7 @@ footer {
   .supabase-pill {
     top: 20px;
     right: 14px;
+    bottom: auto;
     max-width: 48%;
     padding: 7px 9px;
     font-size: 8px;
